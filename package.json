@@ -4,15 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:3100": "set PORT=3100 && next dev",
     "build": "next build",
     "start": "next start",
+    "start:3100": "set PORT=3100 && next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",
     "next": "15.5.4",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
