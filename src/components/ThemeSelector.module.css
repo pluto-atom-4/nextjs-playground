@@ -1,0 +1,75 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  transition: color 0.3s ease;
+}
+
+.select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--foreground);
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.select:hover {
+  opacity: 0.8;
+}
+
+.select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--foreground);
+}
+
+/* Light theme adjustments */
+:global(.light) .container {
+  background-color: transparent;
+}
+
+:global(.light) .select {
+  background-color: #ffffff;
+  color: #171717;
+  border-color: #171717;
+}
+
+:global(.light) .select:hover {
+  background-color: #f5f5f5;
+}
+
+:global(.light) .label {
+  color: #171717;
+}
+
+/* Dark theme adjustments */
+:global(.dark) .container {
+  background-color: transparent;
+}
+
+:global(.dark) .select {
+  background-color: #0a0a0a;
+  color: #ededed;
+  border-color: #ededed;
+}
+
+:global(.dark) .select:hover {
+  background-color: #1a1a1a;
+}
+
+:global(.dark) .label {
+  color: #ededed;
+}
+

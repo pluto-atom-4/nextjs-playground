@@ -1,9 +1,14 @@
 import TabContainer from "@/components/TabContainer";
+import ThemeSelector from "@/components/ThemeSelector";
+import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <TabContainer />
-    </main>
+    <>
+      <ThemeSelector />
+      <main className={styles.main}>
+        <TabContainer />
+      </main>
+    </>
   );
 }
