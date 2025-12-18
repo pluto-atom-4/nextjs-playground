@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import ThemeSelector from "@/components/ThemeSelector";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,10 +15,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body>
+          <ThemeProvider>
+            <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+              <h1 className="text-2xl font-bold">Next.js Playground</h1>
+              <nav className="flex items-center gap-6">
+                <ThemeSelector />
+                <div className="flex items-center gap-4">
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                        Sign In
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
+                  <SignedIn>
+                    <UserButton />
+                  </SignedIn>
+                </div>
+              </nav>
+            </header>
+            <main>{children}</main>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
