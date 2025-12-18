@@ -1,6 +1,6 @@
 # GitHub Copilot Configuration for nextjs-playground
 
-**Date:** December 14, 2025 (Last Updated)  
+**Date:** December 18, 2025 (Last Updated)  
 **Project:** nextjs-playground  
 **Status:** Markdown Format – Updated for Next.js + TypeScript  
 **Environment:** Git Bash on Windows  
@@ -19,6 +19,8 @@
 > - TypeScript best practices
 > - React 19 patterns and hooks
 > - File-specific edits using the proper tools
+> - **⚡ Minimize documentation generation** – Only create docs when explicitly requested
+> - **Generated documents:** Save docs to `./generated/docs-copilot/` (not in workspace root)
 
 ---
 
@@ -90,6 +92,8 @@ nextjs-playground/
 │   └── copilot-instructions.md      # This file
 ├── .idea/                            # WebStorm IDE config
 ├── .next/                            # Next.js build output (git-ignored)
+├── generated/                        # Generated documentation & artifacts
+│   └── docs-copilot/                 # GitHub Copilot generated documents
 ├── public/                           # Static assets
 │   ├── file.svg
 │   ├── globe.svg
@@ -240,6 +244,49 @@ pnpm start
 
 ---
 
+## Generated Documentation
+
+### Minimal Documentation Philosophy
+
+**⚡ Generate documents ONLY when:**
+- Explicitly requested by the user
+- Required for project setup or onboarding
+- Documenting critical fixes or architectural decisions
+- Serving as official project reference materials
+
+**❌ Avoid generating documents for:**
+- Routine code changes or bug fixes
+- Regular development tasks
+- Temporary solutions or experiments
+- One-off troubleshooting steps
+- Information already available in code comments
+
+### Copilot Generated Artifacts
+
+When documents ARE created, save them to:
+
+```
+./generated/docs-copilot/
+```
+
+**Examples of appropriate documents:**
+- Setup guides and onboarding checklists
+- Architecture decision records (ADRs)
+- Critical configuration reports
+- Resolution guides for recurring issues
+- Feature documentation (when not in code comments)
+- Integration guides for new libraries
+
+**File naming conventions:**
+- Use descriptive names with `.md` extension
+- Use UPPERCASE for critical docs (e.g., `SETUP_CHECKLIST.md`, `AUTHENTICATION_GUIDE.md`)
+- Use snake_case for reference docs (e.g., `component_patterns.md`)
+- Include dates for version tracking (e.g., `report_2025-12-18.md`)
+
+This approach keeps generated artifacts organized and separate from source code while minimizing clutter and focusing on actionable code over verbose documentation.
+
+---
+
 ## Important Notes
 
 - ⚠️ This project uses **pnpm**, not npm or yarn. Always use `pnpm` commands.
@@ -276,6 +323,13 @@ pnpm start
 - 📌 Use React Query for server state
 - 📌 Use Zod for input validation
 
+### Documentation Standards
+- 📄 **Prefer inline comments over external docs** – Add JSDoc comments to complex functions
+- 📄 **Self-documenting code** – Use clear names and structure that explain intent
+- 📄 **No auto-generated docs for routine tasks** – Only document when explicitly asked
+- 📄 **Update comments when code changes** – Keep docs in sync with implementation
+- 📄 **External docs only for:** setup guides, onboarding, architecture decisions, critical processes
+
 ---
 
 ## Helpful Links
@@ -290,7 +344,7 @@ pnpm start
 
 ---
 
-**Last Updated:** December 14, 2025  
+**Last Updated:** December 18, 2025  
 **Format Version:** 1.0  
 **Environment:** Git Bash on Windows, WebStorm IDE  
 **Status:** ✅ Verified for Next.js 16 + React 19 + TypeScript
