@@ -1,0 +1,250 @@
+/* CACHE-SHOWCASE PAGE SPECIFIC STYLES */
+
+/* --- HEADER SECTION --- */
+.headerContainer {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.headerMainTitle {
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+  margin-bottom: 1rem;
+}
+
+.headerMainTitle.dark,
+:global(.dark) .headerMainTitle {
+  color: white;
+}
+
+.headerDescription {
+  color: rgb(107, 114, 128);
+}
+
+.headerDescription.dark,
+:global(.dark) .headerDescription {
+  color: rgb(156, 163, 175);
+}
+
+/* --- EXAMPLES GRID --- */
+.examplesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.exampleCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  border: 1px solid rgb(229, 231, 235);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.exampleCard:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.exampleCard.dark,
+:global(.dark) .exampleCard {
+  background-color: rgb(30, 41, 59);
+  border-color: rgb(51, 65, 85);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.exampleCard.dark:hover,
+:global(.dark) .exampleCard:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  background-color: rgb(36, 47, 65);
+  transform: translateY(-2px);
+}
+
+.exampleTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+  margin-bottom: 0.75rem;
+}
+
+.exampleTitle.dark,
+:global(.dark) .exampleTitle {
+  color: white;
+}
+
+.exampleDescription {
+  color: rgb(75, 85, 99);
+  margin-bottom: 1rem;
+}
+
+.exampleDescription.dark,
+:global(.dark) .exampleDescription {
+  color: rgb(209, 213, 219);
+}
+
+.exploreLink {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  background-color: rgb(59, 130, 246);
+  color: white;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.exploreLink:hover {
+  background-color: rgb(37, 99, 235);
+}
+
+/* --- DETAIL SECTION --- */
+.detailSection {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  border: 1px solid rgb(229, 231, 235);
+  margin-bottom: 3rem;
+  transition: all 0.3s ease;
+}
+
+.detailSection.dark,
+:global(.dark) .detailSection {
+  background-color: rgb(30, 41, 59);
+  border-color: rgb(51, 65, 85);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.detailTitle {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+}
+
+.detailTitle.dark,
+:global(.dark) .detailTitle {
+  color: white;
+}
+
+.closeButton {
+  font-size: 1.5rem;
+  color: rgb(107, 114, 128);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.closeButton:hover {
+  color: rgb(55, 65, 81);
+}
+
+.closeButton.dark:hover,
+:global(.dark) .closeButton:hover {
+  color: rgb(209, 213, 219);
+}
+
+.detailContent {
+  color: rgb(51, 65, 85);
+  line-height: 1.625;
+}
+
+.detailContent.dark,
+:global(.dark) .detailContent {
+  color: rgb(209, 213, 219);
+}
+
+/* --- FEATURES SECTION --- */
+.featuresSection {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  border: 1px solid rgb(229, 231, 235);
+  transition: all 0.3s ease;
+}
+
+.featuresSection.dark,
+:global(.dark) .featuresSection {
+  background-color: rgb(30, 41, 59);
+  border-color: rgb(51, 65, 85);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.featureSectionTitle {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+  margin-bottom: 1.5rem;
+}
+
+.featureSectionTitle.dark,
+:global(.dark) .featureSectionTitle {
+  color: white;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.featureItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.featureItemTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17, 24, 39);
+  margin-bottom: 0.5rem;
+}
+
+.featureItemTitle.dark,
+:global(.dark) .featureItemTitle {
+  color: white;
+}
+
+.featureItemDescription {
+  color: rgb(75, 85, 99);
+}
+
+.featureItemDescription.dark,
+:global(.dark) .featureItemDescription {
+  color: rgb(209, 213, 219);
+}
+
+/* --- BACK LINK SECTION --- */
+.backLinkSection {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.backLinkText {
+  color: rgb(59, 130, 246);
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.backLinkText:hover {
+  color: rgb(37, 99, 235);
+}
+
+.backLinkText.dark:hover {
+  color: rgb(147, 197, 253);
+}

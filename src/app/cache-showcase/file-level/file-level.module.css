@@ -1,0 +1,28 @@
+/* FILE-LEVEL PAGE SPECIFIC STYLES */
+@import '../common.module.css';
+
+.cardSubtitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+  margin-bottom: 1rem;
+}
+
+.cardSubtitle.dark {
+  color: white;
+}
+
+.dataDisplay {
+  margin-bottom: 1.5rem;
+}
+
+.dataLabel {
+  font-weight: 0.6;
+  color: rgb(17, 24, 39);
+  margin-bottom: 0.75rem;
+}
+
+.dataLabel.dark {
+  color: white;
+}
+

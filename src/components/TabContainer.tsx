@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import ContactTab from './ContactTab';
 import AboutTab from './AboutTab';
 
@@ -7,8 +8,8 @@ export default function TabContainer() {
   const [activeTab, setActiveTab] = useState<'contact' | 'about'>('contact');
 
   return (
-    <div className="max-w-md mx-auto mt-10">
-      <div className="flex space-x-4 mb-4">
+    <div className="max-w-2xl mx-auto mt-10">
+      <div className="flex flex-wrap space-x-2 mb-4 gap-2">
         <button
           onClick={() => setActiveTab('contact')}
           className={`px-4 py-2 rounded ${
@@ -25,6 +26,12 @@ export default function TabContainer() {
         >
           About
         </button>
+        <Link
+          href="/cache-showcase"
+          className="px-4 py-2 rounded bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+        >
+          🚀 Cache Showcase
+        </Link>
       </div>
 
       {activeTab === 'contact' && <ContactTab />}

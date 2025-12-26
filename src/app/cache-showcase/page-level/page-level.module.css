@@ -1,0 +1,219 @@
+/* PAGE-LEVEL SPECIFIC STYLES */
+@import '../common.module.css';
+
+.cardSubtitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+  margin-bottom: 1rem;
+}
+
+.cardSubtitle.dark,
+:global(.dark) .cardSubtitle {
+  color: white;
+}
+
+.strategyCard {
+  border-left: 4px solid;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.strategyCard:hover {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  transform: translateX(2px);
+}
+
+.strategyCardGreen {
+  background-color: rgb(240, 253, 244);
+  border-left-color: rgb(34, 197, 94);
+}
+
+.strategyCardGreen.dark,
+:global(.dark) .strategyCardGreen {
+  background-color: rgba(5, 85, 51, 0.2);
+  border-left-color: rgb(74, 222, 128);
+  box-shadow: 0 1px 2px 0 rgba(34, 197, 94, 0.1);
+}
+
+.strategyCardGreen.dark:hover,
+:global(.dark) .strategyCardGreen:hover {
+  background-color: rgba(5, 85, 51, 0.3);
+  box-shadow: 0 2px 4px 0 rgba(34, 197, 94, 0.15);
+}
+
+.strategyCardBlue {
+  background-color: rgb(239, 246, 255);
+  border-left-color: rgb(59, 130, 246);
+}
+
+.strategyCardBlue.dark,
+:global(.dark) .strategyCardBlue {
+  background-color: rgba(30, 58, 138, 0.2);
+  border-left-color: rgb(96, 165, 250);
+  box-shadow: 0 1px 2px 0 rgba(59, 130, 246, 0.1);
+}
+
+.strategyCardBlue.dark:hover,
+:global(.dark) .strategyCardBlue:hover {
+  background-color: rgba(30, 58, 138, 0.3);
+  box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.15);
+}
+
+.strategyCardOrange {
+  background-color: rgb(254, 245, 235);
+  border-left-color: rgb(234, 179, 8);
+}
+
+.strategyCardOrange.dark,
+:global(.dark) .strategyCardOrange {
+  background-color: rgba(124, 45, 18, 0.2);
+  border-left-color: rgb(251, 146, 60);
+  box-shadow: 0 1px 2px 0 rgba(234, 179, 8, 0.1);
+}
+
+.strategyCardOrange.dark:hover,
+:global(.dark) .strategyCardOrange:hover {
+  background-color: rgba(124, 45, 18, 0.3);
+  box-shadow: 0 2px 4px 0 rgba(234, 179, 8, 0.15);
+}
+
+.strategyTitle {
+  font-weight: 0.6;
+  margin-bottom: 0.25rem;
+}
+
+.strategyTitleGreen {
+  color: rgb(20, 83, 45);
+}
+
+.strategyTitleGreen.dark,
+:global(.dark) .strategyTitleGreen {
+  color: rgb(134, 239, 172);
+}
+
+.strategyTitleBlue {
+  color: rgb(30, 58, 138);
+}
+
+.strategyTitleBlue.dark,
+:global(.dark) .strategyTitleBlue {
+  color: rgb(147, 197, 253);
+}
+
+.strategyTitleOrange {
+  color: rgb(124, 45, 18);
+}
+
+.strategyTitleOrange.dark,
+:global(.dark) .strategyTitleOrange {
+  color: rgb(251, 146, 60);
+}
+
+.strategyCode {
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.strategyCodeGreen {
+  color: rgb(20, 83, 45);
+}
+
+.strategyCodeGreen.dark,
+:global(.dark) .strategyCodeGreen {
+  color: rgb(134, 239, 172);
+}
+
+.strategyCodeBlue {
+  color: rgb(30, 58, 138);
+}
+
+.strategyCodeBlue.dark,
+:global(.dark) .strategyCodeBlue {
+  color: rgb(147, 197, 253);
+}
+
+.strategyCodeOrange {
+  color: rgb(124, 45, 18);
+}
+
+.strategyCodeOrange.dark,
+:global(.dark) .strategyCodeOrange {
+  color: rgb(251, 146, 60);
+}
+
+.strategyDescription {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.strategyDescriptionGreen {
+  color: rgb(20, 83, 45);
+}
+
+.strategyDescriptionGreen.dark,
+:global(.dark) .strategyDescriptionGreen {
+  color: rgb(134, 239, 172);
+}
+
+.strategyDescriptionBlue {
+  color: rgb(30, 58, 138);
+}
+
+.strategyDescriptionBlue.dark,
+:global(.dark) .strategyDescriptionBlue {
+  color: rgb(147, 197, 253);
+}
+
+.strategyDescriptionOrange {
+  color: rgb(124, 45, 18);
+}
+
+.strategyDescriptionOrange.dark,
+:global(.dark) .strategyDescriptionOrange {
+  color: rgb(251, 146, 60);
+}
+
+.configCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.configItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.configLabel {
+  font-size: 0.875rem;
+  color: rgb(75, 85, 99);
+}
+
+.configLabel.dark,
+:global(.dark) .configLabel {
+  color: rgb(156, 163, 175);
+}
+
+.configValue {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: rgb(17, 24, 39);
+}
+
+.configValue.dark,
+:global(.dark) .configValue {
+  color: white;
+}
+
+.configValueHighlight {
+  color: rgb(147, 113, 219);
+}
+
+.configValueHighlight.dark,
+:global(.dark) .configValueHighlight {
+  color: rgb(196, 181, 253);
+}
+
