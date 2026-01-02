@@ -2,7 +2,8 @@
 
 **Date:** January 1, 2026  
 **Project:** nextjs-playground  
-**Goal:** Create a comprehensive route showcasing data fetching patterns in Next.js 16 with React Query, Prisma, and PostgreSQL
+**Goal:** Create a comprehensive route showcasing data fetching patterns in Next.js 16 with React Query, Prisma, and PostgreSQL  
+**Testing Strategy:** Vitest (unit/integration), Playwright (E2E), JetBrains HTTP Client (API)
 
 ---
 
@@ -401,13 +402,19 @@ components/
 
 ### Phase 1: Setup & Dependencies
 1. Add Prisma client and CLI to dependencies: `pnpm add @prisma/client && pnpm add -D prisma`
-2. Add optional React Query DevTools: `pnpm add -D @tanstack/react-query-devtools`
-3. Create `.env.local` with `DATABASE_URL` (PostgreSQL or SQLite)
-4. Initialize Prisma: `pnpm exec prisma init`
-5. Update `prisma/schema.prisma` with User, Post, Comment models
-6. Create migration: `pnpm exec prisma migrate dev --name init`
-7. Create seed script: `src/lib/seed.ts`
-8. Add seed script to `package.json`: `"seed": "tsx src/lib/seed.ts"`
+2. Add testing frameworks: `pnpm add -D vitest @vitest/ui @vitest/coverage-v8 @playwright/test tsx`
+3. Add optional React Query DevTools: `pnpm add -D @tanstack/react-query-devtools`
+4. Create `.env.local` with `DATABASE_URL` (PostgreSQL or SQLite)
+5. Initialize Prisma: `pnpm exec prisma init`
+6. Create `vitest.config.ts` with path aliases and coverage config
+7. Create `playwright.config.ts` with web server and browsers config
+8. Update `prisma/schema.prisma` with User, Post, Comment models
+9. Create migration: `pnpm exec prisma migrate dev --name init`
+10. Create seed script: `src/lib/seed.ts`
+11. Add test scripts to `package.json`: `test`, `test:ui`, `test:coverage`, `e2e`, `e2e:ui`
+12. Create database integration tests: `src/__tests__/database/setup.test.ts`, `schema.test.ts`, `seed.test.ts`
+13. Run `pnpm test` to verify database setup tests pass
+14. **Reference:** See `test-plan.md` Phase 1 for detailed test specifications
 
 ### Phase 2: Core Infrastructure
 9. Create `src/lib/db.ts` – Prisma client singleton
@@ -421,74 +428,92 @@ components/
 12. Create `src/app/api/data-fetching/` directory for API routes
 
 ### Phase 3: API Routes (Foundation)
-13. Create `/api/data-fetching/posts` route (GET/POST)
-14. Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
-15. Create `/api/data-fetching/search` route (GET)
-16. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
+15. Create `/api/data-fetching/posts` route (GET/POST)
+16. Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
+17. Create `/api/data-fetching/search` route (GET)
+18. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
+19. Create Vitest API tests: `src/__tests__/api/data-fetching/posts.test.ts`
+20. Create JetBrains HTTP Client file: `http/data-fetching-api.http`
+21. Create API error handling tests: `src/__tests__/api/error-handling.test.ts`
+22. Run `pnpm test src/__tests__/api/` to verify API tests pass
+23. Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
+24. **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
 
 ### Phase 4: Route Sections (Build in Priority Order)
 
 **High Priority (Core patterns):**
-17. **Server Fetch** – `/data-fetching/server-fetch/page.tsx` + `loading.tsx`
+25. **Server Fetch** – `/data-fetching/server-fetch/page.tsx` + `loading.tsx`
     - Demonstrate fetch with revalidate
     - Show request deduplication
     - Display cache metrics
-18. **Server DB** – `/data-fetching/server-db/page.tsx` + `loading.tsx`
+26. **Server DB** – `/data-fetching/server-db/page.tsx` + `loading.tsx`
     - Fetch posts with authors and comments
     - Show pagination/filtering
     - Display database query metrics
-19. **Client Query** – `/data-fetching/client-query/page.tsx` (client component)
+27. **Client Query** – `/data-fetching/client-query/page.tsx` (client component)
     - Search posts with useQuery
     - Create/update/delete mutations
     - Show React Query state
+28. Create Playwright E2E tests: `e2e/server-fetch.spec.ts`, `e2e/server-db.spec.ts`, `e2e/client-query.spec.ts`
+29. Run E2E tests: `pnpm e2e` to verify all routes load and interact correctly
+30. Inspect with Playwright UI: `pnpm e2e:ui`
+31. **Reference:** See `test-plan.md` Phase 4 for detailed Playwright test specifications
 
 **Medium Priority (Streaming patterns):**
-20. **Streaming Basic** – `/data-fetching/streaming-basic/page.tsx`
+32. **Streaming Basic** – `/data-fetching/streaming-basic/page.tsx`
     - Multiple Suspense boundaries
     - Show waterfall timing
     - Display loading metrics
-21. **Patterns - Sequential** – `/data-fetching/patterns/sequential/page.tsx`
+33. **Patterns - Sequential** – `/data-fetching/patterns/sequential/page.tsx`
     - Show await chain pattern
     - Display timing comparison vs parallel
-22. **Patterns - Parallel** – `/data-fetching/patterns/parallel/page.tsx`
+34. **Patterns - Parallel** – `/data-fetching/patterns/parallel/page.tsx`
     - Use Promise.all()
     - Compare time vs sequential
-23. **Patterns - Preloading** – `/data-fetching/patterns/preloading/page.tsx`
+35. **Patterns - Preloading** – `/data-fetching/patterns/preloading/page.tsx`
     - Start fetch before rendering
     - Show timing benefits
+36. Create Playwright streaming tests: `e2e/streaming.spec.ts`, `e2e/patterns.spec.ts`
 
 **Lower Priority (Advanced patterns):**
-24. **Streaming Advanced** – `/data-fetching/streaming-advanced/page.tsx`
+37. **Streaming Advanced** – `/data-fetching/streaming-advanced/page.tsx`
     - Use startTransition
     - Optimistic updates
-25. **Error States** – `/data-fetching/error-states/page.tsx` + `error.tsx`
+38. **Error States** – `/data-fetching/error-states/page.tsx` + `error.tsx`
     - Error boundaries
     - Query param to trigger errors: `?simulate=500`
+39. Create Playwright error states & performance tests: `e2e/error-states.spec.ts`, `e2e/performance.spec.ts`
 
 ### Phase 5: Hub & Documentation
-26. Create main `/data-fetching/page.tsx` hub with:
+40. Create main `/data-fetching/page.tsx` hub with:
     - Overview of all patterns
     - Navigation cards to each section
     - Links to Next.js and React Query documentation
-27. Create `data-fetching.module.css` with consistent styling
-28. Add JSDoc comments to all components
-29. Create inline code examples in each demo component
+    - Add `data-testid` attributes for E2E testing
+41. Create `data-fetching.module.css` with consistent styling
+42. Add JSDoc comments to all components
+43. Create inline code examples in each demo component
+44. Create Playwright hub navigation test: `e2e/hub-navigation.spec.ts`
+45. Run navigation tests: `pnpm e2e e2e/hub-navigation.spec.ts`
+46. **Reference:** See `test-plan.md` Phase 5 for documentation testing specifications
 
 ### Phase 6: Testing & Polish
-30. Visit each `/data-fetching/*` route and verify:
-    - Data loads correctly
-    - Loading states appear
-    - Error states work
-    - Metrics display
-31. Test cache behavior:
-    - Refresh page and check for cache hits
-    - Verify request deduplication (console logs)
-32. Test error scenarios:
-    - Stop database and verify error UI
-    - Visit `/data-fetching/error-states?simulate=500`
-33. Verify React Query DevTools integration (if added)
-34. Check Tailwind CSS styling consistency
-35. Validate TypeScript strict mode compliance
+47. Run full unit test suite: `pnpm test`
+48. Run full E2E test suite: `pnpm e2e`
+49. Generate coverage report: `pnpm test:coverage` (target: 80%+)
+50. Create integration test: `src/__tests__/integration/data-fetching-flow.test.ts`
+51. Create performance tests: `e2e/performance.spec.ts`
+52. Create accessibility tests: `e2e/accessibility.spec.ts`
+53. Verify:
+    - All tests pass (unit + E2E)
+    - Coverage meets 80%+ target
+    - No TypeScript errors: `pnpm tsc --noEmit`
+    - Linting passes: `pnpm lint`
+54. Test cache behavior with DevTools Network tab
+55. Test React Query DevTools integration (if added)
+56. Check Tailwind CSS styling consistency
+57. Final manual testing of all routes and error scenarios
+58. **Reference:** See `test-plan.md` Phase 6 for performance & accessibility testing specifications
 
 ---
 
@@ -659,8 +684,10 @@ Add to `package.json` via `pnpm`:
 # Production dependencies
 pnpm add @prisma/client
 
-# Development dependencies
-pnpm add -D prisma @tanstack/react-query-devtools date-fns
+# Testing & Development dependencies
+pnpm add -D vitest @vitest/ui @vitest/coverage-v8
+pnpm add -D @playwright/test
+pnpm add -D prisma @tanstack/react-query-devtools date-fns tsx
 ```
 
 **Updated Dependencies Section:**
@@ -674,9 +701,14 @@ pnpm add -D prisma @tanstack/react-query-devtools date-fns
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "latest",
     "@tanstack/react-query-devtools": "latest",
+    "@vitest/coverage-v8": "latest",
+    "@vitest/ui": "latest",
     "prisma": "latest",
-    "typescript": "^5.9.3"
+    "tsx": "latest",
+    "typescript": "^5.9.3",
+    "vitest": "latest"
   }
 }
 ```
@@ -687,7 +719,13 @@ pnpm add -D prisma @tanstack/react-query-devtools date-fns
   "scripts": {
     "seed": "node -r tsx/cjs src/lib/seed.ts",
     "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "e2e": "playwright test",
+    "e2e:debug": "playwright test --debug",
+    "e2e:ui": "playwright test --ui"
   }
 }
 ```
@@ -881,10 +919,17 @@ export async function GET(request: Request) {
 
 ## 13. File Creation Checklist
 
-### Phase 1: Core Setup
+### Phase 1: Core Setup & Testing Configuration
+- [ ] `vitest.config.ts` – Vitest configuration with path aliases
+- [ ] `playwright.config.ts` – Playwright configuration
 - [ ] `prisma/schema.prisma` – Updated with User, Post, Comment models
 - [ ] `prisma/migrations/[timestamp]_init/migration.sql` – Auto-generated
 - [ ] `.env.local` – DATABASE_URL set
+- [ ] `src/__tests__/database/setup.test.ts` – Database connectivity tests
+- [ ] `src/__tests__/database/schema.test.ts` – Schema validation tests
+- [ ] `src/__tests__/database/db-singleton.test.ts` – Prisma client singleton tests
+- [ ] `prisma/migrations/__tests__/migrations.test.ts` – Migration tests
+- [ ] `src/__tests__/database/seed.test.ts` – Seed script tests
 
 ### Phase 2: Infrastructure
 - [ ] `src/lib/db.ts` – Prisma client singleton
@@ -896,14 +941,19 @@ export async function GET(request: Request) {
 - [ ] `src/components/DataFetchingDemo/MetricsPanel.tsx`
 - [ ] `src/components/DataFetchingDemo/ErrorFallback.tsx`
 - [ ] `src/components/DataFetchingDemo/demo-components.module.css`
+- [ ] `src/__tests__/lib/demo-data.test.ts` – Utility function tests
+- [ ] `src/__tests__/components/LoadingSkeleton.test.ts` – Component tests
 
-### Phase 3: API Routes
+### Phase 3: API Routes & Testing
 - [ ] `src/app/api/data-fetching/posts/route.ts` (GET/POST)
 - [ ] `src/app/api/data-fetching/posts/[id]/route.ts` (GET/PUT/DELETE)
 - [ ] `src/app/api/data-fetching/search/route.ts`
 - [ ] `src/app/api/data-fetching/simulate-delay/route.ts`
+- [ ] `http/data-fetching-api.http` – JetBrains HTTP Client file
+- [ ] `src/__tests__/api/data-fetching/posts.test.ts` – API endpoint tests
+- [ ] `src/__tests__/api/error-handling.test.ts` – Error handling tests
 
-### Phase 4: Route Sections
+### Phase 4: Route Sections & E2E Tests
 - [ ] `src/app/data-fetching/page.tsx` (Hub)
 - [ ] `src/app/data-fetching/data-fetching.module.css`
 - [ ] `src/app/data-fetching/server-fetch/page.tsx`
@@ -923,30 +973,54 @@ export async function GET(request: Request) {
 - [ ] `src/app/data-fetching/patterns/patterns.module.css`
 - [ ] `src/app/data-fetching/error-states/page.tsx`
 - [ ] `src/app/data-fetching/error-states/error.tsx`
+- [ ] `e2e/server-fetch.spec.ts` – Server Fetch E2E tests
+- [ ] `e2e/server-db.spec.ts` – Server DB E2E tests
+- [ ] `e2e/client-query.spec.ts` – Client Query E2E tests
+- [ ] `e2e/streaming.spec.ts` – Streaming E2E tests
+- [ ] `e2e/patterns.spec.ts` – Pattern E2E tests
+- [ ] `e2e/error-states.spec.ts` – Error states E2E tests
 
-### Phase 5: Documentation (Optional)
+### Phase 5: Documentation & Navigation Testing
 - [ ] Inline JSDoc comments in all components
 - [ ] Links to Next.js and React Query docs in hub page
+- [ ] Add `data-testid` attributes to elements for E2E testing
+- [ ] `e2e/hub-navigation.spec.ts` – Navigation E2E tests
+
+### Phase 6: Advanced Testing (Performance, Accessibility, Integration)
+- [ ] `e2e/performance.spec.ts` – Performance tests
+- [ ] `e2e/accessibility.spec.ts` – Accessibility tests
+- [ ] `src/__tests__/integration/data-fetching-flow.test.ts` – Full integration tests
+- [ ] `.github/workflows/test.yml` – CI/CD test workflow (optional)
 
 ---
 
 ## Next Steps
 
-1. **Review this plan** – Confirm scope and priorities
-2. **Set up Prisma** – Add dependencies, initialize schema, create migrations
-3. **Create infrastructure** – DB client, reusable components, API routes
-4. **Build showcase sections** – Start with high-priority patterns
-5. **Test thoroughly** – Verify cache behavior, error handling, streaming
-6. **Gather feedback** – Test with the project's intended audience
+1. **Review this plan and test-plan.md** – Confirm scope and testing strategy
+2. **Set up dependencies** – Add Vitest, Playwright, Prisma, and testing tools
+3. **Create test configuration** – `vitest.config.ts`, `playwright.config.ts`
+4. **Set up Prisma** – Add dependencies, initialize schema, create migrations
+5. **Create infrastructure** – DB client, reusable components, API routes with tests
+6. **Build showcase sections** – Start with high-priority patterns, add E2E tests as you go
+7. **Run full test suite** – Verify all tests pass (`pnpm test && pnpm e2e`)
+8. **Generate coverage** – Ensure 80%+ coverage target is met
+9. **Gather feedback** – Test with the project's intended audience
 
 ---
 
-**Status:** ✅ Plan Complete  
+**Status:** ✅ Plan Complete with Testing Integration  
 **Last Updated:** January 1, 2026  
 **Ready to implement:** YES
 
 For questions or clarifications on any section, refer to:
+- **Implementation Plan:** implent-plan-fetching-data.md (this file)
+- **Testing Plan:** test-plan.md (comprehensive testing guide)
+- **Database Setup:** database-setup.md (step-by-step database setup)
 - Next.js docs: https://nextjs.org/docs/app/getting-started/fetching-data
 - React Query docs: https://tanstack.com/query/latest
 - Prisma docs: https://www.prisma.io/docs/
+- Prisma Testing: https://www.prisma.io/docs/orm/prisma-client/testing/integration-testing
+- Vitest docs: https://vitest.dev/
+- Playwright docs: https://playwright.dev/
+
 
