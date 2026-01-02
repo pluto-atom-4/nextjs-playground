@@ -417,103 +417,103 @@ components/
 14. **Reference:** See `test-plan.md` Phase 1 for detailed test specifications
 
 ### Phase 2: Core Infrastructure
-9. Create `src/lib/db.ts` – Prisma client singleton
-10. Create `src/lib/demo-data.ts` – Mock data factories
-11. Create `src/components/DataFetchingDemo/` directory with reusable components:
-    - `DemoSection.tsx`
-    - `LoadingSkeleton.tsx`
-    - `DataTable.tsx`
-    - `MetricsPanel.tsx`
-    - `ErrorFallback.tsx`
-12. Create `src/app/api/data-fetching/` directory for API routes
+1. Create `src/lib/db.ts` – Prisma client singleton
+2. Create `src/lib/demo-data.ts` – Mock data factories
+3. Create `src/components/DataFetchingDemo/` directory with reusable components:
+   - `DemoSection.tsx`
+   - `LoadingSkeleton.tsx`
+   - `DataTable.tsx`
+   - `MetricsPanel.tsx`
+   - `ErrorFallback.tsx`
+4. Create `src/app/api/data-fetching/` directory for API routes
 
 ### Phase 3: API Routes (Foundation)
-15. Create `/api/data-fetching/posts` route (GET/POST)
-16. Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
-17. Create `/api/data-fetching/search` route (GET)
-18. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
-19. Create Vitest API tests: `src/__tests__/api/data-fetching/posts.test.ts`
-20. Create JetBrains HTTP Client file: `http/data-fetching-api.http`
-21. Create API error handling tests: `src/__tests__/api/error-handling.test.ts`
-22. Run `pnpm test src/__tests__/api/` to verify API tests pass
-23. Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
-24. **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
+1. Create `/api/data-fetching/posts` route (GET/POST)
+2. Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
+3. Create `/api/data-fetching/search` route (GET)
+4. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
+5. Create Vitest API tests: `src/__tests__/api/data-fetching/posts.test.ts`
+6. Create JetBrains HTTP Client file: `http/data-fetching-api.http`
+7. Create API error handling tests: `src/__tests__/api/error-handling.test.ts`
+8. Run `pnpm test src/__tests__/api/` to verify API tests pass
+9. Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
+10. **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
 
 ### Phase 4: Route Sections (Build in Priority Order)
 
 **High Priority (Core patterns):**
-25. **Server Fetch** – `/data-fetching/server-fetch/page.tsx` + `loading.tsx`
-    - Demonstrate fetch with revalidate
-    - Show request deduplication
-    - Display cache metrics
-26. **Server DB** – `/data-fetching/server-db/page.tsx` + `loading.tsx`
-    - Fetch posts with authors and comments
-    - Show pagination/filtering
-    - Display database query metrics
-27. **Client Query** – `/data-fetching/client-query/page.tsx` (client component)
-    - Search posts with useQuery
-    - Create/update/delete mutations
-    - Show React Query state
-28. Create Playwright E2E tests: `e2e/server-fetch.spec.ts`, `e2e/server-db.spec.ts`, `e2e/client-query.spec.ts`
-29. Run E2E tests: `pnpm e2e` to verify all routes load and interact correctly
-30. Inspect with Playwright UI: `pnpm e2e:ui`
-31. **Reference:** See `test-plan.md` Phase 4 for detailed Playwright test specifications
+1. **Server Fetch** – `/data-fetching/server-fetch/page.tsx` + `loading.tsx`
+   - Demonstrate fetch with revalidate
+   - Show request deduplication
+   - Display cache metrics
+2. **Server DB** – `/data-fetching/server-db/page.tsx` + `loading.tsx`
+   - Fetch posts with authors and comments
+   - Show pagination/filtering
+   - Display database query metrics
+3. **Client Query** – `/data-fetching/client-query/page.tsx` (client component)
+   - Search posts with useQuery
+   - Create/update/delete mutations
+   - Show React Query state
+4. Create Playwright E2E tests: `e2e/server-fetch.spec.ts`, `e2e/server-db.spec.ts`, `e2e/client-query.spec.ts`
+5. Run E2E tests: `pnpm e2e` to verify all routes load and interact correctly
+6. Inspect with Playwright UI: `pnpm e2e:ui`
+7. **Reference:** See `test-plan.md` Phase 4 for detailed Playwright test specifications
 
 **Medium Priority (Streaming patterns):**
-32. **Streaming Basic** – `/data-fetching/streaming-basic/page.tsx`
-    - Multiple Suspense boundaries
-    - Show waterfall timing
-    - Display loading metrics
-33. **Patterns - Sequential** – `/data-fetching/patterns/sequential/page.tsx`
-    - Show await chain pattern
-    - Display timing comparison vs parallel
-34. **Patterns - Parallel** – `/data-fetching/patterns/parallel/page.tsx`
-    - Use Promise.all()
-    - Compare time vs sequential
-35. **Patterns - Preloading** – `/data-fetching/patterns/preloading/page.tsx`
-    - Start fetch before rendering
-    - Show timing benefits
-36. Create Playwright streaming tests: `e2e/streaming.spec.ts`, `e2e/patterns.spec.ts`
+1. **Streaming Basic** – `/data-fetching/streaming-basic/page.tsx`
+   - Multiple Suspense boundaries
+   - Show waterfall timing
+   - Display loading metrics
+2. **Patterns - Sequential** – `/data-fetching/patterns/sequential/page.tsx`
+   - Show await chain pattern
+   - Display timing comparison vs parallel
+3. **Patterns - Parallel** – `/data-fetching/patterns/parallel/page.tsx`
+   - Use Promise.all()
+   - Compare time vs sequential
+4. **Patterns - Preloading** – `/data-fetching/patterns/preloading/page.tsx`
+   - Start fetch before rendering
+   - Show timing benefits
+5. Create Playwright streaming tests: `e2e/streaming.spec.ts`, `e2e/patterns.spec.ts`
 
 **Lower Priority (Advanced patterns):**
-37. **Streaming Advanced** – `/data-fetching/streaming-advanced/page.tsx`
-    - Use startTransition
-    - Optimistic updates
-38. **Error States** – `/data-fetching/error-states/page.tsx` + `error.tsx`
-    - Error boundaries
-    - Query param to trigger errors: `?simulate=500`
-39. Create Playwright error states & performance tests: `e2e/error-states.spec.ts`, `e2e/performance.spec.ts`
+1. **Streaming Advanced** – `/data-fetching/streaming-advanced/page.tsx`
+   - Use startTransition
+   - Optimistic updates
+2. **Error States** – `/data-fetching/error-states/page.tsx` + `error.tsx`
+   - Error boundaries
+   - Query param to trigger errors: `?simulate=500`
+3. Create Playwright error states & performance tests: `e2e/error-states.spec.ts`, `e2e/performance.spec.ts`
 
 ### Phase 5: Hub & Documentation
-40. Create main `/data-fetching/page.tsx` hub with:
-    - Overview of all patterns
-    - Navigation cards to each section
-    - Links to Next.js and React Query documentation
-    - Add `data-testid` attributes for E2E testing
-41. Create `data-fetching.module.css` with consistent styling
-42. Add JSDoc comments to all components
-43. Create inline code examples in each demo component
-44. Create Playwright hub navigation test: `e2e/hub-navigation.spec.ts`
-45. Run navigation tests: `pnpm e2e e2e/hub-navigation.spec.ts`
-46. **Reference:** See `test-plan.md` Phase 5 for documentation testing specifications
+1. Create main `/data-fetching/page.tsx` hub with:
+   - Overview of all patterns
+   - Navigation cards to each section
+   - Links to Next.js and React Query documentation
+   - Add `data-testid` attributes for E2E testing
+2. Create `data-fetching.module.css` with consistent styling
+3. Add JSDoc comments to all components
+4. Create inline code examples in each demo component
+5. Create Playwright hub navigation test: `e2e/hub-navigation.spec.ts`
+6. Run navigation tests: `pnpm e2e e2e/hub-navigation.spec.ts`
+7. **Reference:** See `test-plan.md` Phase 5 for documentation testing specifications
 
 ### Phase 6: Testing & Polish
-47. Run full unit test suite: `pnpm test`
-48. Run full E2E test suite: `pnpm e2e`
-49. Generate coverage report: `pnpm test:coverage` (target: 80%+)
-50. Create integration test: `src/__tests__/integration/data-fetching-flow.test.ts`
-51. Create performance tests: `e2e/performance.spec.ts`
-52. Create accessibility tests: `e2e/accessibility.spec.ts`
-53. Verify:
-    - All tests pass (unit + E2E)
-    - Coverage meets 80%+ target
-    - No TypeScript errors: `pnpm tsc --noEmit`
-    - Linting passes: `pnpm lint`
-54. Test cache behavior with DevTools Network tab
-55. Test React Query DevTools integration (if added)
-56. Check Tailwind CSS styling consistency
-57. Final manual testing of all routes and error scenarios
-58. **Reference:** See `test-plan.md` Phase 6 for performance & accessibility testing specifications
+1. Run full unit test suite: `pnpm test`
+2. Run full E2E test suite: `pnpm e2e`
+3. Generate coverage report: `pnpm test:coverage` (target: 80%+)
+4. Create integration test: `src/__tests__/integration/data-fetching-flow.test.ts`
+5. Create performance tests: `e2e/performance.spec.ts`
+6. Create accessibility tests: `e2e/accessibility.spec.ts`
+7. Verify:
+   - All tests pass (unit + E2E)
+   - Coverage meets 80%+ target
+   - No TypeScript errors: `pnpm tsc --noEmit`
+   - Linting passes: `pnpm lint`
+8. Test cache behavior with DevTools Network tab
+9. Test React Query DevTools integration (if added)
+10. Check Tailwind CSS styling consistency
+11. Final manual testing of all routes and error scenarios
+12. **Reference:** See `test-plan.md` Phase 6 for performance & accessibility testing specifications
 
 ---
 
@@ -1009,7 +1009,7 @@ export async function GET(request: Request) {
 ---
 
 **Status:** ✅ Plan Complete with Testing Integration  
-**Last Updated:** January 1, 2026  
+**Last Updated:** January 1, 2026
 **Ready to implement:** YES
 
 For questions or clarifications on any section, refer to:
