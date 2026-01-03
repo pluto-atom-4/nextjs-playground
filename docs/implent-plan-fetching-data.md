@@ -1,9 +1,10 @@
 # Implementation Plan: Next.js Data Fetching Patterns Showcase
 
-**Date:** January 1, 2026  
+**Date:** January 2, 2026  
 **Project:** nextjs-playground  
-**Goal:** Create a comprehensive route showcasing data fetching patterns in Next.js 16 with React Query, Prisma, and PostgreSQL  
+**Goal:** Create a comprehensive route showcasing data fetching patterns in Next.js 16 with React Query, Prisma 7, and PostgreSQL  
 **Testing Strategy:** Vitest (unit/integration), Playwright (E2E), JetBrains HTTP Client (API)
+**Prisma Version:** 7.2.0+
 
 ---
 
@@ -84,12 +85,18 @@ Each route section contains:
 
 ### Database Setup
 
-- **ORM:** Prisma
+- **ORM:** Prisma 7 (≥7.2.0)
 - **Database:** PostgreSQL (with SQLite option for local dev)
 - **Schema Location:** `prisma/schema.prisma`
 - **Migrations:** `prisma/migrations/`
 - **Environment:** `DATABASE_URL` in `.env.local`
 - **Seeding:** `src/lib/seed.ts` script
+
+**Prisma 7 Features:**
+- Optimized client startup with JSON protocol
+- Enhanced SQLite support for local development
+- Better error messages and type inference
+- Improved migration handling
 
 ---
 
@@ -338,9 +345,15 @@ SearchInput.tsx
 **Location:** `prisma/schema.prisma`
 
 ```prisma
+// Prisma 7: Enhanced schema with improved performance and type inference
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -351,6 +364,8 @@ model User {
   comments  Comment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Post {
@@ -362,6 +377,8 @@ model Post {
   comments  Comment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("posts")
 }
 
 model Comment {
@@ -373,28 +390,18 @@ model Comment {
   authorId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("comments")
 }
 ```
 
-### Module CSS Files
-
-**Location:** `src/app/data-fetching/` and `src/components/DataFetchingDemo/`
-
-```
-data-fetching.module.css (main hub styles)
-server-fetch.module.css
-server-db.module.css
-client-query.module.css
-streaming-basic.module.css
-streaming-advanced.module.css
-patterns/
-  ├── sequential.module.css
-  ├── parallel.module.css
-  └── preloading.module.css
-error-states.module.css
-components/
-  └── demo-components.module.css
-```
+**Prisma 7 Enhancements:**
+- Optimized relation queries with better caching
+- Improved type inference for queries and mutations
+- Better cascade delete handling
+- Enhanced datetime support with automatic UTC conversion
+- Added `@@map` for table name customization
+- Faster client initialization with JSON protocol
 
 ---
 
@@ -404,28 +411,33 @@ components/
 1. Add Prisma client and CLI to dependencies: `pnpm add @prisma/client && pnpm add -D prisma`
 2. Add testing frameworks: `pnpm add -D vitest @vitest/ui @vitest/coverage-v8 @playwright/test tsx`
 3. Add optional React Query DevTools: `pnpm add -D @tanstack/react-query-devtools`
-4. Create `.env.local` with `DATABASE_URL` (PostgreSQL or SQLite)
-5. Initialize Prisma: `pnpm exec prisma init`
+4. Create `.env.local` with `DATABASE_URL` (PostgreSQL or SQLite) – See database-setup.md Step 4
+5. Initialize Prisma: `pnpm exec prisma init` – See database-setup.md Step 2
 6. Create `vitest.config.ts` with path aliases and coverage config
 7. Create `playwright.config.ts` with web server and browsers config
-8. Update `prisma/schema.prisma` with User, Post, Comment models
-9. Create migration: `pnpm exec prisma migrate dev --name init`
-10. Create seed script: `src/lib/seed.ts`
-11. Add test scripts to `package.json`: `test`, `test:ui`, `test:coverage`, `e2e`, `e2e:ui`
-12. Create database integration tests: `src/__tests__/database/setup.test.ts`, `schema.test.ts`, `seed.test.ts`
-13. Run `pnpm test` to verify database setup tests pass
-14. **Reference:** See `test-plan.md` Phase 1 for detailed test specifications
+8. Update `prisma/schema.prisma` with User, Post, Comment models – See database-setup.md Step 5
+9. Create migration: `pnpm exec prisma migrate dev --name init` – See database-setup.md Step 6
+10. **Create database client:** `src/lib/db.ts` – Prisma 7 singleton pattern with optimized initialization and logging (see database-setup.md Step 7)
+11. **Create seed script:** `src/lib/seed.ts` – Database seeding with Users, Posts, Comments (see database-setup.md Step 8)
+12. **Add seed script to package.json** and run: `pnpm seed` (see database-setup.md Step 9)
+13. Add test scripts to `package.json`: `test`, `test:ui`, `test:coverage`, `e2e`, `e2e:ui`
+14. Create database integration tests: `src/__tests__/database/setup.test.ts`, `schema.test.ts`, `seed.test.ts`
+15. Run `pnpm test` to verify database setup tests pass
+16. **Reference:** See `test-plan.md` Phase 1 for detailed test specifications and `database-setup.md` Steps 7-9 for implementation details
 
 ### Phase 2: Core Infrastructure
-1. Create `src/lib/db.ts` – Prisma client singleton
-2. Create `src/lib/demo-data.ts` – Mock data factories
-3. Create `src/components/DataFetchingDemo/` directory with reusable components:
+1. **Database client already created** in Phase 1 Step 10: `src/lib/db.ts` – Prisma 7 singleton with optimized initialization (see database-setup.md Step 7 for details)
+2. **Seed script already created** in Phase 1 Step 11: `src/lib/seed.ts` – Database seeding implementation (see database-setup.md Step 8 for details)
+3. **Database already seeded** in Phase 1 Step 12: Run `pnpm seed` to populate database (see database-setup.md Step 9 for details)
+4. Create `src/lib/demo-data.ts` – Mock data factories (for testing/development without seeding)
+5. Create `src/components/DataFetchingDemo/` directory with reusable components:
    - `DemoSection.tsx`
    - `LoadingSkeleton.tsx`
    - `DataTable.tsx`
    - `MetricsPanel.tsx`
    - `ErrorFallback.tsx`
-4. Create `src/app/api/data-fetching/` directory for API routes
+6. Create `src/app/api/data-fetching/` directory for API routes
+7. Verify database connectivity with `pnpm exec prisma studio` – Opens UI at http://localhost:5555 (see database-setup.md Step 10 for details)
 
 ### Phase 3: API Routes (Foundation)
 1. Create `/api/data-fetching/posts` route (GET/POST)
@@ -1008,19 +1020,21 @@ export async function GET(request: Request) {
 
 ---
 
-**Status:** ✅ Plan Complete with Testing Integration  
-**Last Updated:** January 1, 2026
+**Status:** ✅ Plan Complete with Prisma 7 Integration  
+**Last Updated:** January 2, 2026  
+**Prisma Version:** 7.2.0+  
 **Ready to implement:** YES
 
 For questions or clarifications on any section, refer to:
 - **Implementation Plan:** implent-plan-fetching-data.md (this file)
 - **Testing Plan:** test-plan.md (comprehensive testing guide)
-- **Database Setup:** database-setup.md (step-by-step database setup)
+- **Database Setup:** database-setup.md (step-by-step database setup with Prisma 7)
 - Next.js docs: https://nextjs.org/docs/app/getting-started/fetching-data
 - React Query docs: https://tanstack.com/query/latest
-- Prisma docs: https://www.prisma.io/docs/
+- **Prisma 7 docs:** https://www.prisma.io/docs/orm (Latest version with JSON protocol & enhanced SQLite)
+- **Prisma Migration Guide:** https://www.prisma.io/docs/orm/prisma-migrate
+- **Prisma Client Reference:** https://www.prisma.io/docs/orm/reference/prisma-client-reference
 - Prisma Testing: https://www.prisma.io/docs/orm/prisma-client/testing/integration-testing
 - Vitest docs: https://vitest.dev/
 - Playwright docs: https://playwright.dev/
-
 

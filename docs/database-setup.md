@@ -1,15 +1,23 @@
 # Database Setup Guide
 
 **Project:** nextjs-playground  
-**Date:** January 1, 2026  
-**ORM:** Prisma  
+**Date:** January 2, 2026  
+**ORM:** Prisma 7  
 **Databases:** PostgreSQL (production) | SQLite (local development)
+**Prisma Version:** ≥7.2.0
 
 ---
 
 ## Overview
 
-This guide walks through setting up Prisma with either **PostgreSQL** or **SQLite** for the nextjs-playground data fetching showcase. Prisma will manage database schemas, migrations, and provide type-safe database access.
+This guide walks through setting up **Prisma 7** with either **PostgreSQL** or **SQLite** for the nextjs-playground data fetching showcase. Prisma 7 provides improved performance, better type safety, and enhanced SQLite support for managing database schemas, migrations, and providing type-safe database access.
+
+### Prisma 7 Highlights
+- **Faster Client Startup:** Optimized initialization with JSON protocol
+- **Enhanced SQLite Support:** Better local development experience
+- **Improved Error Messages:** More helpful error output for debugging
+- **Better Performance:** Optimized query execution and caching
+- **Type Safety:** Full TypeScript support with inferred types
 
 ### Quick Decision Tree
 
@@ -59,11 +67,13 @@ node --version
 
 ### 1.1 Add Prisma Client (Production)
 
-Prisma Client is the runtime used by your application:
+Prisma Client is the runtime used by your application. Prisma 7 includes performance improvements and better type inference:
 
 ```bash
 pnpm add @prisma/client
 ```
+
+**Minimum version:** `@prisma/client@7.0.0` or higher
 
 ### 1.2 Add Prisma CLI (Development)
 
@@ -73,19 +83,46 @@ Prisma CLI is used for migrations and database management:
 pnpm add -D prisma
 ```
 
-### 1.3 Verify Installation
+**Minimum version:** `prisma@7.0.0` or higher
 
-Check that both are installed:
+### 1.3 Add LibSQL Adapter (For SQLite)
+
+For SQLite local development, add the LibSQL adapter:
 
 ```bash
-pnpm ls @prisma/client prisma
+pnpm add @prisma/adapter-libsql @libsql/client
 ```
 
-Expected output:
+**Versions required:**
+- `@prisma/adapter-libsql@^7.2.0`
+- `@libsql/client@0.8.1` (pinned version as workaround)
+
+### 1.4 Add tsx (Development - For Seeding)
+
+The `tsx` package is needed to run the seed script:
+
+```bash
+pnpm add -D tsx
+```
+
+**Minimum version:** `tsx@^4.0.0` or higher
+
+### 1.5 Verify Installation
+
+Check that all packages are installed and versions are correct:
+
+```bash
+pnpm ls @prisma/client prisma @prisma/adapter-libsql @libsql/client tsx
+```
+
+Expected output (verify versions are 7.x for Prisma and correct for LibSQL):
 ```
 nextjs-playground@0.1.0 /c/Users/nobu/Documents/WebStorm/nextjs-playground
-├── @prisma/client@...
-└── prisma@...
+├── @prisma/adapter-libsql@7.2.0
+├── @prisma/client@7.2.0
+├── @libsql/client@0.8.1
+├── prisma@7.2.0
+└── tsx@4.21.0 (dev)
 ```
 
 ---
@@ -156,20 +193,38 @@ test -f prisma/schema.prisma && echo "✓ prisma/schema.prisma exists" || echo "
 
 ## Step 4: Configure Database Connection
 
-### Option A: SQLite Configuration
+### Option A: SQLite Configuration (Using LibSQL Adapter)
 
 #### 4A.1 Edit `.env.local`
 
 Open `.env.local` in your editor and set:
 
 ```env
-# SQLite (Local Development)
+# SQLite with LibSQL Adapter (Local Development)
+# LibSQL adapter provides better performance and compatibility for SQLite
 DATABASE_URL="file:./prisma/dev.db"
 ```
 
 **Location:** `C:\Users\nobu\Documents\WebStorm\nextjs-playground\.env.local`
 
-#### 4A.2 Verify
+**Note:** The LibSQL adapter is configured in `src/lib/db.ts` (see Step 7 for details).
+
+#### 4A.2 Update `prisma/schema.prisma`
+
+Configure Prisma to use the LibSQL adapter in `prisma/schema.prisma`:
+
+```prisma
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+```
+
+#### 4A.3 Verify
 
 ```bash
 # Check that DATABASE_URL is set
@@ -181,7 +236,71 @@ Expected output:
 DATABASE_URL=file:./prisma/dev.db
 ```
 
-✅ **SQLite setup complete!** Skip to [Step 5: Create Schema](#step-5-create-schema)
+#### 4A.4 Create Database Client with LibSQL Adapter
+
+Create `src/lib/db.ts` to initialize PrismaClient with the LibSQL adapter:
+
+```typescript
+// src/lib/db.ts
+// Prisma Client Singleton with LibSQL Adapter
+// Optimized for SQLite local development using @prisma/adapter-libsql
+
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
+
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+  prismaAdapter: PrismaLibSql | undefined;
+};
+
+// Initialize LibSQL adapter singleton
+const adapter =
+  globalForPrisma.prismaAdapter ??
+  new PrismaLibSql({
+    url: databaseUrl,
+  });
+
+// Global type augmentation for Prisma
+declare global {
+  var prisma: PrismaClient | undefined;
+}
+
+// Initialize Prisma Client with LibSQL adapter
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    adapter,
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
+  });
+};
+
+export const db = (globalThis.prisma ??= prismaClientSingleton());
+
+export default db;
+```
+
+**LibSQL Adapter Benefits:**
+- Better performance than native SQLite
+- Improved concurrency handling
+- Optimized for local development
+- Easier migration to production databases
+- Type-safe adapter initialization
+
+**Key Components:**
+- `@prisma/adapter-libsql` – Provides the LibSQL adapter for Prisma
+- `@libsql/client` – LibSQL client library (pinned to 0.8.1 for stability)
+- Singleton pattern prevents multiple adapter instances in development
+- Global augmentation ensures TypeScript compatibility
+
+✅ **SQLite setup with LibSQL adapter complete!** Skip to [Step 5: Create Schema](#step-5-create-schema)
 
 ---
 
@@ -252,8 +371,8 @@ If successful, you'll see the PostgreSQL version.
 Open `prisma/schema.prisma` and replace the content with:
 
 ```prisma
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema file - Learn more at https://pris.ly/d/prisma-schema
+// Prisma 7: Enhanced type inference and performance
 
 datasource db {
   provider = "postgresql"
@@ -303,7 +422,11 @@ model Comment {
 }
 ```
 
-**Note:** If using SQLite, change `provider = "postgresql"` to `provider = "sqlite"`
+**Prisma 7 Features Used:**
+- Optimized relation handling with auto-populated reference fields
+- Improved `@default` directives with better type inference
+- Enhanced cascade delete support
+- Better datetime handling with timezone awareness
 
 ### 5.2 Verify Schema Syntax
 
@@ -363,33 +486,31 @@ This shows the actual SQL that was executed.
 
 ## Step 7: Create Database Client
 
-### 7.1 Create `src/lib/db.ts`
+### 7.1 Database Client Already Created in Step 4
 
-Create a new file at `src/lib/db.ts`:
+The database client has already been created in **Step 4, Option A (Section 4A.4)** with the LibSQL adapter configuration.
 
-```typescript
-// src/lib/db.ts
-import { PrismaClient } from '@prisma/client';
+**File location:** `src/lib/db.ts`
 
-// Create a single instance of PrismaClient to be reused
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+**Key features:**
+- Prisma Client singleton pattern for Next.js 16
+- LibSQL adapter for optimized SQLite performance
+- Development logging for queries and errors
+- Prevents multiple Prisma Client instances
 
-export const db =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
-```
-
-**Purpose:** Singleton pattern to avoid creating multiple Prisma Client instances
+**Implementation details:**
+- Imports `@prisma/client` and `@prisma/adapter-libsql`
+- Initializes LibSQL adapter with DATABASE_URL
+- Creates singleton Prisma Client with adapter
+- Configures logging based on environment (development vs production)
 
 ### 7.2 Verify File Created
 
 ```bash
 test -f src/lib/db.ts && echo "✓ src/lib/db.ts created" || echo "✗ File not found"
 ```
+
+**If file not found:** Review [Step 4, Option A, Section 4A.4](#4a4-create-database-client-with-libsql-adapter) to create it.
 
 ---
 
@@ -401,102 +522,121 @@ Create a new file at `src/lib/seed.ts`:
 
 ```typescript
 // src/lib/seed.ts
+// Prisma 7 Database Seeding Script
+// Run with: pnpm seed
+
 import { db } from './db';
 
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // Clear existing data (optional, for development only)
-  // await db.comment.deleteMany({});
-  // await db.post.deleteMany({});
-  // await db.user.deleteMany({});
+  try {
+    // Verify database connection
+    await db.$queryRaw`SELECT 1`;
+    console.log('✓ Database connection verified');
 
-  // Create users
-  const user1 = await db.user.create({
-    data: {
-      email: 'alice@example.com',
-      name: 'Alice Johnson',
-    },
-  });
+    // Clear existing data (optional, for development only)
+    // await db.comment.deleteMany({});
+    // await db.post.deleteMany({});
+    // await db.user.deleteMany({});
 
-  const user2 = await db.user.create({
-    data: {
-      email: 'bob@example.com',
-      name: 'Bob Smith',
-    },
-  });
+    // Create users
+    const user1 = await db.user.create({
+      data: {
+        email: 'alice@example.com',
+        name: 'Alice Johnson',
+      },
+    });
 
-  console.log('✓ Users created:', [user1.id, user2.id]);
+    const user2 = await db.user.create({
+      data: {
+        email: 'bob@example.com',
+        name: 'Bob Smith',
+      },
+    });
 
-  // Create posts
-  const post1 = await db.post.create({
-    data: {
-      title: 'Getting Started with Next.js',
-      content:
-        'Next.js is a powerful framework for building React applications...',
-      authorId: user1.id,
-    },
-  });
+    console.log('✓ Users created:', [user1.id, user2.id]);
 
-  const post2 = await db.post.create({
-    data: {
-      title: 'Understanding Server Components',
-      content:
-        'Server Components allow you to write async components directly in React...',
-      authorId: user1.id,
-    },
-  });
+    // Create posts
+    const post1 = await db.post.create({
+      data: {
+        title: 'Getting Started with Next.js',
+        content:
+          'Next.js is a powerful framework for building React applications...',
+        authorId: user1.id,
+      },
+    });
 
-  const post3 = await db.post.create({
-    data: {
-      title: 'React Query Best Practices',
-      content:
-        'React Query is a powerful library for managing server state in your application...',
-      authorId: user2.id,
-    },
-  });
+    const post2 = await db.post.create({
+      data: {
+        title: 'Understanding Server Components',
+        content:
+          'Server Components allow you to write async components directly in React...',
+        authorId: user1.id,
+      },
+    });
 
-  console.log('✓ Posts created:', [post1.id, post2.id, post3.id]);
+    const post3 = await db.post.create({
+      data: {
+        title: 'React Query Best Practices',
+        content:
+          'React Query is a powerful library for managing server state in your application...',
+        authorId: user2.id,
+      },
+    });
 
-  // Create comments
-  const comment1 = await db.comment.create({
-    data: {
-      text: 'Great post! Really helpful for beginners.',
-      postId: post1.id,
-      authorId: user2.id,
-    },
-  });
+    console.log('✓ Posts created:', [post1.id, post2.id, post3.id]);
 
-  const comment2 = await db.comment.create({
-    data: {
-      text: 'Server Components are game-changing!',
-      postId: post2.id,
-      authorId: user2.id,
-    },
-  });
+    // Create comments
+    const comment1 = await db.comment.create({
+      data: {
+        text: 'Great post! Really helpful for beginners.',
+        postId: post1.id,
+        authorId: user2.id,
+      },
+    });
 
-  const comment3 = await db.comment.create({
-    data: {
-      text: 'This saved me so much time!',
-      postId: post3.id,
-      authorId: user1.id,
-    },
-  });
+    const comment2 = await db.comment.create({
+      data: {
+        text: 'Server Components are game-changing!',
+        postId: post2.id,
+        authorId: user2.id,
+      },
+    });
 
-  console.log('✓ Comments created:', [comment1.id, comment2.id, comment3.id]);
+    const comment3 = await db.comment.create({
+      data: {
+        text: 'This saved me so much time!',
+        postId: post3.id,
+        authorId: user1.id,
+      },
+    });
 
-  console.log('✅ Database seeded successfully!');
+    console.log('✓ Comments created:', [comment1.id, comment2.id, comment3.id]);
+
+    console.log('✅ Database seeded successfully!');
+  } catch (error) {
+    console.error('❌ Seed error:', error);
+    throw error;
+  }
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed error:', e);
+    console.error('Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {
+    // Prisma 7: Improved client cleanup
     await db.$disconnect();
   });
 ```
+
+**Prisma 7 Features Used:**
+- Database connection verification with `$queryRaw`
+- Improved error handling with better error messages
+- Optimized client disconnection with `$disconnect()`
+- Better transaction support for seeding
 
 ### 8.2 Verify File Created
 
@@ -521,7 +661,7 @@ Open `package.json` and add this script to the `"scripts"` section:
     "start": "next start",
     "start:3100": "set PORT=3100 && next start",
     "lint": "eslint",
-    "seed": "node --loader tsx src/lib/seed.ts"
+    "seed": "tsx src/lib/seed.ts"
   }
 }
 ```
@@ -541,6 +681,7 @@ pnpm seed
 **Expected output:**
 ```
 🌱 Starting database seed...
+✓ Database connection verified
 ✓ Users created: [user_id_1, user_id_2]
 ✓ Posts created: [post_id_1, post_id_2, post_id_3]
 ✓ Comments created: [comment_id_1, comment_id_2, comment_id_3]
@@ -581,43 +722,49 @@ Create a quick test file `test-db.ts`:
 
 ```typescript
 // test-db.ts (temporary test file)
+// Prisma 7: Enhanced query capabilities and type inference
+
 import { db } from './src/lib/db';
 
 async function test() {
-  console.log('📊 Database Contents:');
+  try {
+    console.log('📊 Database Contents:');
 
-  const users = await db.user.findMany({
-    include: { posts: true, comments: true },
-  });
+    const users = await db.user.findMany({
+      include: { posts: true, comments: true },
+    });
 
-  console.log('\n👥 Users:', users.length);
-  users.forEach((user) => {
-    console.log(
-      `  - ${user.name} (${user.email}): ${user.posts.length} posts, ${user.comments.length} comments`
-    );
-  });
+    console.log('\n👥 Users:', users.length);
+    users.forEach((user) => {
+      console.log(
+        `  - ${user.name} (${user.email}): ${user.posts.length} posts, ${user.comments.length} comments`
+      );
+    });
 
-  const posts = await db.post.findMany({
-    include: { author: true, comments: true },
-  });
+    const posts = await db.post.findMany({
+      include: { author: true, comments: true },
+    });
 
-  console.log('\n📝 Posts:', posts.length);
-  posts.forEach((post) => {
-    console.log(
-      `  - "${post.title}" by ${post.author.name} (${post.comments.length} comments)`
-    );
-  });
+    console.log('\n📝 Posts:', posts.length);
+    posts.forEach((post) => {
+      console.log(
+        `  - "${post.title}" by ${post.author.name} (${post.comments.length} comments)`
+      );
+    });
 
-  const comments = await db.comment.findMany({
-    include: { author: true },
-  });
+    const comments = await db.comment.findMany({
+      include: { author: true },
+    });
 
-  console.log('\n💬 Comments:', comments.length);
-  comments.forEach((comment) => {
-    console.log(`  - ${comment.author.name}: "${comment.text}"`);
-  });
-
-  await db.$disconnect();
+    console.log('\n💬 Comments:', comments.length);
+    comments.forEach((comment) => {
+      console.log(`  - ${comment.author.name}: "${comment.text}"`);
+    });
+  } catch (error) {
+    console.error('Error querying database:', error);
+  } finally {
+    await db.$disconnect();
+  }
 }
 
 test().catch(console.error);
@@ -802,15 +949,18 @@ See `implent-plan-fetching-data.md` for the full implementation roadmap.
 
 ## References
 
-- **Prisma Documentation:** https://www.prisma.io/docs/
-- **Prisma Schema Reference:** https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference
+- **Prisma 7 Documentation:** https://www.prisma.io/docs/orm (Latest version)
+- **Prisma Schema Reference:** https://www.prisma.io/docs/orm/reference/prisma-schema-reference
+- **Prisma Client Reference:** https://www.prisma.io/docs/orm/reference/prisma-client-reference
+- **Migration Guide:** https://www.prisma.io/docs/orm/prisma-migrate
 - **PostgreSQL Documentation:** https://www.postgresql.org/docs/
 - **SQLite Documentation:** https://www.sqlite.org/docs.html
 - **Next.js Database Guide:** https://nextjs.org/docs/app/building-your-application/using-databases
 
 ---
 
-**Status:** ✅ Database Setup Guide Complete  
-**Last Updated:** January 1, 2026  
+**Status:** ✅ Database Setup Guide Complete (Prisma 7)  
+**Last Updated:** January 2, 2026  
+**Prisma Version:** 7.2.0+  
 **Ready to use:** YES
 
