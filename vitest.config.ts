@@ -3,7 +3,7 @@ import path from 'path';
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    environment: 'node',
 
     // Enable global test APIs (describe, it, expect, etc.)
     globals: true,
