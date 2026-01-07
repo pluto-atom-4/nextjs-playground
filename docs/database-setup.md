@@ -934,6 +934,266 @@ pnpm install
 
 ---
 
+## Architecture & Structure - Database Setup for Data Fetching Showcase
+
+This section provides the specific database architecture requirements for the `/data-fetching` showcase route implementation, based on `implent-plan-fetching-data.md` Phase 2 infrastructure requirements.
+
+### Schema Requirements
+
+The Prisma schema must support the following data fetching patterns:
+
+#### 1. User Model
+**Purpose:** Represent authors and commenters in the system
+
+```prisma
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  posts     Post[]           // One-to-many: User → Posts
+  comments  Comment[]        // One-to-many: User → Comments
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+```
+
+**Uses:**
+- Server-side fetching (Prisma queries)
+- Client-side queries (React Query)
+- Relationship demonstration in streaming examples
+
+#### 2. Post Model
+**Purpose:** Represent blog posts with author relationships
+
+```prisma
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+  comments  Comment[]        // One-to-many: Post → Comments
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("posts")
+}
+```
+
+**Uses:**
+- Primary entity for demo queries
+- Test sequential vs parallel fetching
+- Demonstrate pagination/filtering patterns
+- Show request deduplication with multiple queries
+
+#### 3. Comment Model
+**Purpose:** Represent comments on posts with cascading delete
+
+```prisma
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("comments")
+}
+```
+
+**Uses:**
+- Demonstrate nested relationship fetching
+- Show cascading deletes in error scenarios
+- Test complex WHERE clauses and filtering
+
+### Database Configuration for Data Fetching Demo
+
+#### Option A: SQLite (Recommended for Local Development)
+
+**Advantages:**
+- Zero setup required
+- File-based, no external service
+- Perfect for local testing
+- Suitable for demo/showcase purposes
+
+**Configuration:**
+
+1. **Set DATABASE_URL in `.env.local`:**
+   ```
+   DATABASE_URL="file:./prisma/dev.db"
+   ```
+
+2. **Run migrations:**
+   ```bash
+   pnpm exec prisma migrate dev --name init
+   ```
+
+3. **Seed demo data:**
+   ```bash
+   pnpm seed
+   ```
+
+#### Option B: PostgreSQL (Recommended for Production-like Testing)
+
+**Advantages:**
+- More realistic production environment
+- Better for performance testing
+- Supports advanced PostgreSQL features
+- Scalable to multiple databases
+
+**Configuration:**
+
+1. **Start PostgreSQL** (Docker example):
+   ```bash
+   docker run --name postgres-dev \
+     -e POSTGRES_PASSWORD=password \
+     -e POSTGRES_DB=nextjs_demo \
+     -p 5432:5432 \
+     postgres:latest
+   ```
+
+2. **Set DATABASE_URL in `.env.local`:**
+   ```
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/nextjs_demo"
+   ```
+
+3. **Run migrations:**
+   ```bash
+   pnpm exec prisma migrate dev --name init
+   ```
+
+4. **Seed demo data:**
+   ```bash
+   pnpm seed
+   ```
+
+### Database Seeding for Data Fetching Patterns
+
+The seeding process populates the database with demo data specifically designed for the showcase patterns. Located in `src/lib/seed.ts`:
+
+**Default seed structure:**
+- 3 Users (Alice, Bob, Charlie) – For multi-author scenarios
+- 5-15 Posts – For pagination, filtering, and relationship demos
+- 10-25 Comments – For nested fetching demonstrations
+
+**Seed script usage:**
+```bash
+# Run seed script
+pnpm seed
+
+# Seed resets database (if using SQLite)
+# Make sure to backup important data first
+```
+
+**Seed verifiable outcomes:**
+- ✅ Users created with unique emails
+- ✅ Posts associated with correct authors
+- ✅ Comments linked to posts and authors
+- ✅ Timestamps (createdAt, updatedAt) properly set
+
+### Integration with Data Fetching Patterns
+
+#### Pattern 1: Sequential Fetching
+Demonstrates one request after another:
+```typescript
+// Fetch user first
+const user = await prisma.user.findUnique({ where: { id: userId } });
+
+// Then fetch their posts
+const posts = await prisma.post.findMany({ where: { authorId: user.id } });
+```
+
+#### Pattern 2: Parallel Fetching
+Demonstrates concurrent requests:
+```typescript
+const [user, allPosts] = await Promise.all([
+  prisma.user.findUnique({ where: { id: userId } }),
+  prisma.post.findMany(),
+]);
+```
+
+#### Pattern 3: Nested/Relationship Fetching
+Demonstrates include strategy:
+```typescript
+const postWithAuthorAndComments = await prisma.post.findUnique({
+  where: { id: postId },
+  include: {
+    author: true,
+    comments: { include: { author: true } },
+  },
+});
+```
+
+### Migration Strategy for Data Fetching Demo
+
+**Migration Workflow:**
+
+1. **Initial Schema Setup:**
+   ```bash
+   pnpm exec prisma migrate dev --name init
+   ```
+   Creates initial migration file: `prisma/migrations/[timestamp]_init/migration.sql`
+
+2. **Add Demo Data:**
+   ```bash
+   pnpm seed
+   ```
+   Populates User, Post, Comment tables
+
+3. **Verify Data:**
+   ```bash
+   pnpm exec prisma studio
+   ```
+   Opens UI at `http://localhost:5555` to inspect data
+
+4. **Reset if Needed:**
+   ```bash
+   pnpm exec prisma migrate reset
+   ```
+   Clears and re-seeds database (use cautiously!)
+
+### Query Performance Considerations for Demos
+
+When demonstrating different fetching patterns, consider:
+
+1. **Request Deduplication:** 
+   - Same query run twice returns cached result
+   - Measure via metrics panel in demo components
+
+2. **Cache Strategy:**
+   - `revalidate` - Time-based cache expiration
+   - `tags` - On-demand invalidation
+   - `next: { revalidate: 0 }` - Always fetch fresh
+
+3. **Database Query Optimization:**
+   - Use `include` for relationships (not separate queries)
+   - Use `select` to fetch only needed fields
+   - Implement pagination for large datasets
+
+4. **Metrics Collection:**
+   - Use `console.time()` / `console.timeEnd()` in server components
+   - Display timings in `MetricsPanel` component
+   - Show hit/miss cache status from `next.js` headers
+
+### Environment Setup Checklist
+
+- [ ] Database server running (PostgreSQL) or SQLite path set
+- [ ] `DATABASE_URL` configured in `.env.local`
+- [ ] Prisma dependencies installed: `@prisma/client`, `prisma`
+- [ ] Schema file at `prisma/schema.prisma` with User, Post, Comment models
+- [ ] Initial migration created: `pnpm exec prisma migrate dev --name init`
+- [ ] Database seeded: `pnpm seed`
+- [ ] Prisma Studio accessible: `pnpm exec prisma studio`
+- [ ] No TypeScript errors: `pnpm tsc --noEmit`
+- [ ] Demo data verified in Prisma Studio
+
+---
+
 ## Next Steps
 
 After database setup is complete:
