@@ -1,0 +1,193 @@
+### Data Fetching API - HTTP Client Tests
+### For use with JetBrains IDE HTTP Client plugin
+### Place requests in this order: Setup → Tests
+
+@baseUrl = http://localhost:3000/api/data-fetching
+@contentType = application/json
+
+### ============================================================================
+### SETUP - Get a sample user ID for testing
+### ============================================================================
+
+### 1. List all posts to get user/post IDs
+GET {{baseUrl}}/posts?page=1&limit=5
+
+### Store response for later use
+> {%
+  client.global.set("firstPostId", response.body.posts[0]?.id);
+  client.global.set("firstUserId", response.body.posts[0]?.author?.id);
+%}
+
+---
+
+### ============================================================================
+### POSTS API - Read Operations
+### ============================================================================
+
+### 2. Get all posts with pagination
+GET {{baseUrl}}/posts
+
+### 3. Get posts with custom pagination
+GET {{baseUrl}}/posts?page=1&limit=20
+
+### 4. Get posts page 2
+GET {{baseUrl}}/posts?page=2&limit=10
+
+### 5. Get single post by ID
+GET {{baseUrl}}/posts/{{firstPostId}}
+
+---
+
+### ============================================================================
+### POSTS API - Write Operations
+### ============================================================================
+
+### 6. Create a new post (requires valid authorId)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "HTTP Client Test Post",
+  "content": "This post was created using the JetBrains HTTP Client",
+  "authorId": "{{firstUserId}}"
+}
+
+> {%
+  client.global.set("newPostId", response.body.id);
+%}
+
+### 7. Update post (if newPostId was created)
+PUT {{baseUrl}}/posts/{{newPostId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated: HTTP Client Test Post",
+  "content": "This post was updated using the JetBrains HTTP Client"
+}
+
+### 8. Delete post (if newPostId was created)
+DELETE {{baseUrl}}/posts/{{newPostId}}
+
+---
+
+### ============================================================================
+### COMMENTS API
+### ============================================================================
+
+### 9. Get comments for a post
+GET {{baseUrl}}/posts/{{firstPostId}}/comments
+
+### 10. Create a comment (requires valid authorId)
+POST {{baseUrl}}/posts/{{firstPostId}}/comments
+Content-Type: {{contentType}}
+
+{
+  "text": "Great post! Created via HTTP Client.",
+  "authorId": "{{firstUserId}}"
+}
+
+---
+
+### ============================================================================
+### SEARCH API
+### ============================================================================
+
+### 11. Search for posts (basic search)
+GET {{baseUrl}}/search?q=data&limit=10
+
+### 12. Search with single word
+GET {{baseUrl}}/search?q=fetching
+
+### 13. Search with custom limit
+GET {{baseUrl}}/search?q=react&limit=5
+
+### 14. Search with no results (edge case)
+GET {{baseUrl}}/search?q=nonexistenttermxyz123
+
+---
+
+### ============================================================================
+### METRICS API
+### ============================================================================
+
+### 15. Get performance metrics and database stats
+GET {{baseUrl}}/metrics
+
+---
+
+### ============================================================================
+### SIMULATE DELAY API
+### ============================================================================
+
+### 16. Simulate 1-second delay (default)
+GET {{baseUrl}}/simulate-delay
+
+### 17. Simulate 3-second delay
+GET {{baseUrl}}/simulate-delay?delay=3000
+
+### 18. Simulate 5-second delay
+GET {{baseUrl}}/simulate-delay?delay=5000
+
+### 19. Simulate delay with category parameter
+GET {{baseUrl}}/simulate-delay?delay=2000&category=demo
+
+---
+
+### ============================================================================
+### ERROR SCENARIOS - Test Error Handling
+### ============================================================================
+
+### 20. Invalid pagination (negative page)
+GET {{baseUrl}}/posts?page=-1
+
+### 21. Invalid pagination (non-numeric limit)
+GET {{baseUrl}}/posts?page=1&limit=abc
+
+### 22. Get non-existent post
+GET {{baseUrl}}/posts/nonexistent-id-123
+
+### 23. Create post without required fields
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Missing content and authorId"
+}
+
+### 24. Search without query parameter
+GET {{baseUrl}}/search
+
+### 25. Invalid delay parameter
+GET {{baseUrl}}/simulate-delay?delay=invalid
+
+### 26. Delay exceeds maximum (31 seconds)
+GET {{baseUrl}}/simulate-delay?delay=31000
+
+### 27. Update post with no fields
+PUT {{baseUrl}}/posts/{{firstPostId}}
+Content-Type: {{contentType}}
+
+{
+}
+
+---
+
+### ============================================================================
+### NOTES
+### ============================================================================
+
+# Before running these requests:
+# 1. Start the dev server: pnpm dev
+# 2. Ensure database is populated: pnpm seed
+# 3. Open this file in WebStorm and use Ctrl+Alt+Enter to run a request
+#    (or click the green arrow on the left side of each request)
+
+# Request Syntax:
+# - Use ### to separate requests
+# - Use @variable = value to define variables
+# - Use {{variable}} to reference variables
+# - Use > {% %} blocks for response handling and variable assignment
+
+# For more info on HTTP Client:
+# https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+
