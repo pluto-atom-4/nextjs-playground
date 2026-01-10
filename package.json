@@ -17,7 +17,8 @@
     "e2e:debug": "playwright test --debug",
     "e2e:ui": "playwright test --ui",
     "seed": "tsx src/lib/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "db:verify": "tsx verify-database.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
