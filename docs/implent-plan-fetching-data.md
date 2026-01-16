@@ -481,7 +481,16 @@ model Comment {
    - **HTTP Tests:** 27 requests in `http/data-fetching-api.http`
    - **Documentation:** See `generated/docs-copilot/PHASE3_API_ROUTES_COMPLETE.md`
    - **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
-2. Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
+2. ✅ **COMPLETE** - Create `/api/data-fetching/posts/[id]` route (GET/PUT/DELETE)
+   - **File:** `src/app/api/data-fetching/posts/[id]/route.ts`
+   - **GET Endpoint:** Fetch single post with author and comments
+   - **PUT Endpoint:** Update post title and/or content
+   - **DELETE Endpoint:** Delete post (cascade deletes comments)
+   - **Tests:** 8 integration tests covering all CRUD operations
+   - **Test File:** `src/__tests__/api/data-fetching/posts-id.test.ts`
+   - **Status:** All 8 tests PASSING ✅
+   - **Coverage:** GET (2 tests) + PUT (3 tests) + DELETE (3 tests)
+   - **HTTP Tests:** Integrated in `http/data-fetching-api.http` (requests 5, 7-8)
 3. Create `/api/data-fetching/search` route (GET)
 4. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
 5. ✅ **COMPLETE** - Create Vitest API tests: `src/__tests__/api/data-fetching/posts.test.ts`
