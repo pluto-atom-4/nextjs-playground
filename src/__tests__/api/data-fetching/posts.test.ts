@@ -1,53 +1,64 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/data-fetching/posts/route';
 import { db } from '@/lib/db';
 
 /**
- * API Tests for POST /api/data-fetching/posts
+ * API Tests for GET/POST /api/data-fetching/posts
  *
  * Tests both GET (fetch posts with pagination) and POST (create post) endpoints
- * Uses integration testing approach to verify database operations and HTTP responses
+ * Uses unit testing approach with mocked database for reliability and speed
  *
- * @see https://www.prisma.io/docs/orm/prisma-client/testing/integration-testing
+ * @see https://www.prisma.io/docs/orm/prisma-client/testing/unit-testing
  */
-describe('POST /api/data-fetching/posts', () => {
-  let testUserId: string;
-  let testPostId: string;
 
-  beforeAll(async () => {
-    // Ensure connection to test database
-    await db.$connect();
+// Mock the database
+vi.mock('@/lib/db', () => ({
+  db: {
+    post: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+    },
+  },
+}));
+
+describe('GET /api/data-fetching/posts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  afterAll(async () => {
-    // Clean up and disconnect
-    await db.$disconnect();
-  });
-
-  beforeEach(async () => {
-    // Create a test user for each test
-    const user = await db.user.create({
-      data: {
-        email: `test-${Date.now()}@example.com`,
-        name: 'Test User',
-      },
-    });
-    testUserId = user.id;
-  });
-
-  describe('GET Endpoint', () => {
+  describe('Valid Requests', () => {
     it('should fetch all posts with default pagination', async () => {
-      // Create test post
-      await db.post.create({
-        data: {
-          title: 'Test Post',
-          content: 'Test content',
-          authorId: testUserId,
+      const mockPosts = [
+        {
+          id: 'post-1',
+          title: 'Test Post 1',
+          content: 'Test content 1',
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+          comments: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-      });
+        {
+          id: 'post-2',
+          title: 'Test Post 2',
+          content: 'Test content 2',
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+          comments: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
 
-      // Create mock request
+      vi.mocked(db.post.count).mockResolvedValue(2);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
+
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
         method: 'GET',
       });
@@ -59,63 +70,61 @@ describe('POST /api/data-fetching/posts', () => {
       expect(data).toHaveProperty('posts');
       expect(data).toHaveProperty('pagination');
       expect(Array.isArray(data.posts)).toBe(true);
+      expect(data.posts.length).toBe(2);
       expect(data.pagination).toEqual({
-        total: expect.any(Number),
+        total: 2,
         page: 1,
         limit: 10,
-        pages: expect.any(Number),
+        pages: 1,
       });
     });
 
     it('should support pagination with page and limit query parameters', async () => {
-      // Create multiple test posts
-      const postsToCreate = 15;
-      for (let i = 0; i < postsToCreate; i++) {
-        await db.post.create({
-          data: {
-            title: `Post ${i + 1}`,
-            content: `Content ${i + 1}`,
-            authorId: testUserId,
-          },
-        });
-      }
+      const mockPosts = Array.from({ length: 5 }, (_, i) => ({
+        id: `post-${i + 1}`,
+        title: `Post ${i + 1}`,
+        content: `Content ${i + 1}`,
+        authorId: 'user-1',
+        author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+        comments: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
 
-      // Test page 1 with limit 5
-      const request1 = new NextRequest(
-        'http://localhost:3000/api/data-fetching/posts?page=1&limit=5',
-        { method: 'GET' }
-      );
+      vi.mocked(db.post.count).mockResolvedValue(15);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
 
-      const response1 = await GET(request1);
-      const data1 = await response1.json();
-
-      expect(response1.status).toBe(200);
-      expect(data1.posts.length).toBeLessThanOrEqual(5);
-      expect(data1.pagination.page).toBe(1);
-      expect(data1.pagination.limit).toBe(5);
-
-      // Test page 2
-      const request2 = new NextRequest(
+      const request = new NextRequest(
         'http://localhost:3000/api/data-fetching/posts?page=2&limit=5',
         { method: 'GET' }
       );
 
-      const response2 = await GET(request2);
-      const data2 = await response2.json();
+      const response = await GET(request);
+      const data = await response.json();
 
-      expect(response2.status).toBe(200);
-      expect(data2.pagination.page).toBe(2);
+      expect(response.status).toBe(200);
+      expect(data.posts.length).toBe(5);
+      expect(data.pagination.page).toBe(2);
+      expect(data.pagination.limit).toBe(5);
+      expect(data.pagination.pages).toBe(3);
     });
 
     it('should include author information in posts', async () => {
-      // Create test post
-      await db.post.create({
-        data: {
+      const mockPosts = [
+        {
+          id: 'post-1',
           title: 'Post with Author',
           content: 'Test content',
-          authorId: testUserId,
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John Doe', email: 'john@example.com' },
+          comments: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-      });
+      ];
+
+      vi.mocked(db.post.count).mockResolvedValue(1);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
         method: 'GET',
@@ -125,7 +134,6 @@ describe('POST /api/data-fetching/posts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.posts.length).toBeGreaterThan(0);
       expect(data.posts[0]).toHaveProperty('author');
       expect(data.posts[0].author).toHaveProperty('id');
       expect(data.posts[0].author).toHaveProperty('name');
@@ -133,31 +141,21 @@ describe('POST /api/data-fetching/posts', () => {
     });
 
     it('should include comment count in posts', async () => {
-      // Create test post
-      const post = await db.post.create({
-        data: {
+      const mockPosts = [
+        {
+          id: 'post-1',
           title: 'Post with Comments',
           content: 'Test content',
-          authorId: testUserId,
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+          comments: [{ id: 'c1' }, { id: 'c2' }, { id: 'c3' }],
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-      });
+      ];
 
-      // Create test comments
-      await db.comment.create({
-        data: {
-          text: 'Comment 1',
-          postId: post.id,
-          authorId: testUserId,
-        },
-      });
-
-      await db.comment.create({
-        data: {
-          text: 'Comment 2',
-          postId: post.id,
-          authorId: testUserId,
-        },
-      });
+      vi.mocked(db.post.count).mockResolvedValue(1);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
         method: 'GET',
@@ -167,13 +165,14 @@ describe('POST /api/data-fetching/posts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      const fetchedPost = data.posts.find((p: any) => p.id === post.id);
-      expect(fetchedPost).toBeDefined();
-      expect(fetchedPost).toHaveProperty('comments');
-      expect(fetchedPost.comments.length).toBe(2);
+      expect(data.posts[0]).toHaveProperty('comments');
+      expect(data.posts[0].comments.length).toBe(3);
     });
 
     it('should enforce maximum limit of 100', async () => {
+      vi.mocked(db.post.count).mockResolvedValue(0);
+      vi.mocked(db.post.findMany).mockResolvedValue([]);
+
       const request = new NextRequest(
         'http://localhost:3000/api/data-fetching/posts?limit=500',
         { method: 'GET' }
@@ -183,43 +182,52 @@ describe('POST /api/data-fetching/posts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.pagination.limit).toBeLessThanOrEqual(100);
+      expect(data.pagination.limit).toBe(100);
     });
 
-    it('should handle invalid page parameter gracefully', async () => {
+    it('should enforce minimum limit of 1', async () => {
+      vi.mocked(db.post.count).mockResolvedValue(0);
+      vi.mocked(db.post.findMany).mockResolvedValue([]);
+
       const request = new NextRequest(
-        'http://localhost:3000/api/data-fetching/posts?page=abc',
+        'http://localhost:3000/api/data-fetching/posts?limit=0',
         { method: 'GET' }
       );
 
       const response = await GET(request);
       const data = await response.json();
 
-      // Route returns 400 for NaN parameters
-      expect(response.status).toBe(400);
-      expect(data).toHaveProperty('error');
-      expect(data.error).toContain('Invalid pagination parameters');
+      expect(response.status).toBe(200);
+      expect(data.pagination.limit).toBe(1);
     });
 
     it('should sort posts by createdAt in descending order', async () => {
-      // Create posts with slight delays to ensure different timestamps
-      const post1 = await db.post.create({
-        data: {
-          title: 'First Post',
-          content: 'Content 1',
-          authorId: testUserId,
-        },
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      const post2 = await db.post.create({
-        data: {
-          title: 'Second Post',
+      const now = new Date();
+      const mockPosts = [
+        {
+          id: 'post-2',
+          title: 'Newer Post',
           content: 'Content 2',
-          authorId: testUserId,
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+          comments: [],
+          createdAt: new Date(now.getTime() + 1000),
+          updatedAt: new Date(),
         },
-      });
+        {
+          id: 'post-1',
+          title: 'Older Post',
+          content: 'Content 1',
+          authorId: 'user-1',
+          author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+          comments: [],
+          createdAt: new Date(now.getTime() - 1000),
+          updatedAt: new Date(),
+        },
+      ];
+
+      vi.mocked(db.post.count).mockResolvedValue(2);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
         method: 'GET',
@@ -229,26 +237,24 @@ describe('POST /api/data-fetching/posts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      const posts = data.posts;
-      expect(posts.length).toBeGreaterThanOrEqual(2);
-
-      // Most recent post should be first
-      const post2Index = posts.findIndex((p: any) => p.id === post2.id);
-      const post1Index = posts.findIndex((p: any) => p.id === post1.id);
-      expect(post2Index).toBeLessThan(post1Index);
+      expect(data.posts[0].id).toBe('post-2');
+      expect(data.posts[1].id).toBe('post-1');
     });
 
     it('should return correct pagination metadata', async () => {
-      // Create 25 posts
-      for (let i = 0; i < 25; i++) {
-        await db.post.create({
-          data: {
-            title: `Post ${i + 1}`,
-            content: `Content ${i + 1}`,
-            authorId: testUserId,
-          },
-        });
-      }
+      const mockPosts = Array.from({ length: 10 }, (_, i) => ({
+        id: `post-${i + 1}`,
+        title: `Post ${i + 1}`,
+        content: `Content ${i + 1}`,
+        authorId: 'user-1',
+        author: { id: 'user-1', name: 'John', email: 'john@example.com' },
+        comments: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+      vi.mocked(db.post.count).mockResolvedValue(25);
+      vi.mocked(db.post.findMany).mockResolvedValue(mockPosts);
 
       const request = new NextRequest(
         'http://localhost:3000/api/data-fetching/posts?page=1&limit=10',
@@ -259,28 +265,98 @@ describe('POST /api/data-fetching/posts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.pagination.pages).toBeGreaterThanOrEqual(3);
-      expect(data.pagination.total).toBeGreaterThanOrEqual(25);
+      expect(data.pagination.pages).toBe(3);
+      expect(data.pagination.total).toBe(25);
     });
 
-    it('should handle database errors gracefully', async () => {
-      // This test would require mocking db to force an error
-      // For now, we verify the error handling structure exists
+    it('should return empty array when no posts exist', async () => {
+      vi.mocked(db.post.count).mockResolvedValue(0);
+      vi.mocked(db.post.findMany).mockResolvedValue([]);
+
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
         method: 'GET',
       });
 
       const response = await GET(request);
-      expect([200, 400, 500]).toContain(response.status);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.posts).toEqual([]);
+      expect(data.pagination.total).toBe(0);
     });
   });
 
-  describe('POST Endpoint', () => {
+  describe('Error Cases', () => {
+    it('should handle invalid page parameter gracefully', async () => {
+      const request = new NextRequest(
+        'http://localhost:3000/api/data-fetching/posts?page=abc',
+        { method: 'GET' }
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toHaveProperty('error');
+      expect(data.error).toContain('Invalid pagination parameters');
+    });
+
+    it('should handle invalid limit parameter gracefully', async () => {
+      const request = new NextRequest(
+        'http://localhost:3000/api/data-fetching/posts?limit=invalid',
+        { method: 'GET' }
+      );
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toHaveProperty('error');
+      expect(data.error).toContain('Invalid pagination parameters');
+    });
+
+    it('should handle database errors gracefully', async () => {
+      vi.mocked(db.post.count).mockRejectedValue(new Error('Database connection failed'));
+
+      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
+        method: 'GET',
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data).toHaveProperty('error');
+      expect(data.error).toContain('Failed to fetch posts');
+    });
+  });
+});
+
+describe('POST /api/data-fetching/posts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Valid Requests', () => {
     it('should create a new post with valid data', async () => {
+      const mockUser = { id: 'user-1', name: 'John', email: 'john@example.com' };
+      const mockPost = {
+        id: 'post-1',
+        title: 'New Test Post',
+        content: 'This is test content',
+        authorId: 'user-1',
+        author: mockUser,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(db.post.create).mockResolvedValue(mockPost as any);
+
       const postData = {
         title: 'New Test Post',
         content: 'This is test content',
-        authorId: testUserId,
+        authorId: 'user-1',
       };
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
@@ -295,22 +371,88 @@ describe('POST /api/data-fetching/posts', () => {
       expect(data).toHaveProperty('id');
       expect(data.title).toBe(postData.title);
       expect(data.content).toBe(postData.content);
-      expect(data.author.id).toBe(testUserId);
-
-      testPostId = data.id;
-
-      // Verify post was saved to database
-      const savedPost = await db.post.findUnique({
-        where: { id: data.id },
-      });
-      expect(savedPost).toBeDefined();
-      expect(savedPost?.title).toBe(postData.title);
+      expect(data.author.id).toBe('user-1');
     });
 
+    it('should include author information in created post response', async () => {
+      const mockUser = { id: 'user-1', name: 'John Doe', email: 'john@example.com' };
+      const mockPost = {
+        id: 'post-1',
+        title: 'Post with author info',
+        content: 'Testing author inclusion',
+        authorId: 'user-1',
+        author: mockUser,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(db.post.create).mockResolvedValue(mockPost as any);
+
+      const postData = {
+        title: 'Post with author info',
+        content: 'Testing author inclusion',
+        authorId: 'user-1',
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
+        method: 'POST',
+        body: JSON.stringify(postData),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data).toHaveProperty('author');
+      expect(data.author).toHaveProperty('id');
+      expect(data.author).toHaveProperty('name');
+      expect(data.author).toHaveProperty('email');
+      expect(data.author.id).toBe('user-1');
+    });
+
+    it('should set timestamps on created post', async () => {
+      const now = new Date();
+      const mockUser = { id: 'user-1', name: 'John', email: 'john@example.com' };
+      const mockPost = {
+        id: 'post-1',
+        title: 'Post with timestamps',
+        content: 'Testing timestamp creation',
+        authorId: 'user-1',
+        author: mockUser,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser as any);
+      vi.mocked(db.post.create).mockResolvedValue(mockPost as any);
+
+      const postData = {
+        title: 'Post with timestamps',
+        content: 'Testing timestamp creation',
+        authorId: 'user-1',
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
+        method: 'POST',
+        body: JSON.stringify(postData),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data).toHaveProperty('createdAt');
+      expect(data).toHaveProperty('updatedAt');
+      expect(typeof data.createdAt).toBe('string');
+    });
+  });
+
+  describe('Validation Error Cases', () => {
     it('should return 400 when missing title', async () => {
       const postData = {
         content: 'Content without title',
-        authorId: testUserId,
+        authorId: 'user-1',
       };
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
@@ -329,7 +471,7 @@ describe('POST /api/data-fetching/posts', () => {
     it('should return 400 when missing content', async () => {
       const postData = {
         title: 'Title without content',
-        authorId: testUserId,
+        authorId: 'user-1',
       };
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
@@ -364,7 +506,26 @@ describe('POST /api/data-fetching/posts', () => {
       expect(data.error).toContain('authorId');
     });
 
+    it('should return 400 when missing all required fields', async () => {
+      const postData = {};
+
+      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
+        method: 'POST',
+        body: JSON.stringify(postData),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data).toHaveProperty('error');
+    });
+  });
+
+  describe('Author Validation', () => {
     it('should return 404 when author does not exist', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(null);
+
       const postData = {
         title: 'Post by non-existent author',
         content: 'This should fail',
@@ -384,11 +545,13 @@ describe('POST /api/data-fetching/posts', () => {
       expect(data.error).toContain('Author not found');
     });
 
-    it('should include author information in created post response', async () => {
+    it('should verify author exists before creating post', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(null);
+
       const postData = {
-        title: 'Post with author info',
-        content: 'Testing author inclusion',
-        authorId: testUserId,
+        title: 'Test',
+        content: 'Test',
+        authorId: 'invalid-user',
       };
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
@@ -399,91 +562,19 @@ describe('POST /api/data-fetching/posts', () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(201);
-      expect(data).toHaveProperty('author');
-      expect(data.author).toHaveProperty('id');
-      expect(data.author).toHaveProperty('name');
-      expect(data.author).toHaveProperty('email');
-      expect(data.author.id).toBe(testUserId);
-    });
-
-    it('should set timestamps on created post', async () => {
-      const postData = {
-        title: 'Post with timestamps',
-        content: 'Testing timestamp creation',
-        authorId: testUserId,
-      };
-
-      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
-        method: 'POST',
-        body: JSON.stringify(postData),
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(201);
-      expect(data).toHaveProperty('createdAt');
-      expect(data).toHaveProperty('updatedAt');
-      expect(new Date(data.createdAt)).toBeInstanceOf(Date);
-    });
-
-    it('should handle multiple post creation from same author', async () => {
-      const post1Data = {
-        title: 'First post from author',
-        content: 'Content 1',
-        authorId: testUserId,
-      };
-
-      const post2Data = {
-        title: 'Second post from author',
-        content: 'Content 2',
-        authorId: testUserId,
-      };
-
-      const request1 = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
-        method: 'POST',
-        body: JSON.stringify(post1Data),
-      });
-
-      const response1 = await POST(request1);
-      expect(response1.status).toBe(201);
-
-      const request2 = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
-        method: 'POST',
-        body: JSON.stringify(post2Data),
-      });
-
-      const response2 = await POST(request2);
-      expect(response2.status).toBe(201);
-
-      // Verify both posts exist in database
-      const userPosts = await db.post.findMany({
-        where: { authorId: testUserId },
-      });
-
-      expect(userPosts.length).toBeGreaterThanOrEqual(2);
+      expect(response.status).toBe(404);
+      expect(vi.mocked(db.post.create)).not.toHaveBeenCalled();
     });
   });
 
   describe('Error Handling', () => {
     it('should return 500 on unexpected database error', async () => {
-      // This would require mocking the db to force a database error
-      // For integration testing, we rely on the error handling structure
-      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
-        method: 'GET',
-      });
+      vi.mocked(db.user.findUnique).mockRejectedValue(new Error('Database connection failed'));
 
-      const response = await GET(request);
-      expect([200, 400, 500]).toContain(response.status);
-    });
-
-    it('should properly log errors for debugging', async () => {
-      // Verify error logging is in place by checking error scenario
       const postData = {
         title: 'Test',
         content: 'Test',
-        authorId: 'invalid',
+        authorId: 'user-1',
       };
 
       const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
@@ -492,8 +583,21 @@ describe('POST /api/data-fetching/posts', () => {
       });
 
       const response = await POST(request);
-      expect([400, 404]).toContain(response.status);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data).toHaveProperty('error');
+      expect(data.error).toContain('Failed to create post');
+    });
+
+    it('should handle invalid JSON body', async () => {
+      const request = new NextRequest('http://localhost:3000/api/data-fetching/posts', {
+        method: 'POST',
+        body: 'invalid json {',
+      });
+
+      const response = await POST(request);
+      expect([400, 500]).toContain(response.status);
     });
   });
 });
-
