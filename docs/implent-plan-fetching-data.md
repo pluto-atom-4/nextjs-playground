@@ -491,8 +491,24 @@ model Comment {
    - **Status:** All 8 tests PASSING ✅
    - **Coverage:** GET (2 tests) + PUT (3 tests) + DELETE (3 tests)
    - **HTTP Tests:** Integrated in `http/data-fetching-api.http` (requests 5, 7-8)
-3. Create `/api/data-fetching/search` route (GET)
-4. Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
+3. ✅ **COMPLETE** - Create `/api/data-fetching/search` route (GET)
+   - **File:** `src/app/api/data-fetching/search/route.ts`
+   - **Endpoint:** Search posts by title or content with pagination (q, limit params)
+   - **Features:** Case-insensitive search, result limiting (max 100), author/comment info
+   - **Tests:** 19 comprehensive integration tests
+   - **Test File:** `src/__tests__/api/data-fetching/search.test.ts`
+   - **Status:** All 19 tests PASSING ✅
+   - **Coverage:** 10 valid searches + 5 error cases + 4 parameter combinations
+   - **HTTP Tests:** Integrated in `http/data-fetching-api.http`
+4. ✅ **COMPLETE** - Create `/api/data-fetching/simulate-delay` route (GET with optional delay)
+   - **File:** `src/app/api/data-fetching/simulate-delay/route.ts`
+   - **Endpoint:** Simulate slow endpoint with configurable delay (0-30000ms)
+   - **Features:** Actual delay measurement, optional category parameter, unique IDs per response
+   - **Tests:** 29 comprehensive integration tests
+   - **Test File:** `src/__tests__/api/data-fetching/simulate-delay.test.ts`
+   - **Status:** All 29 tests PASSING ✅
+   - **Coverage:** 12 valid delays + 6 error cases + 4 response structure tests + 3 edge cases + 3 performance tests
+   - **HTTP Tests:** Integrated in `http/data-fetching-api.http`
 5. ✅ **COMPLETE** - Create Vitest API tests: `src/__tests__/api/data-fetching/posts.test.ts`
    - **Tests:** 19 comprehensive integration tests covering GET, POST, and error scenarios
    - **Status:** All 19 tests PASSING ✅
@@ -502,7 +518,7 @@ model Comment {
    - **Requests:** 27 organized test requests
    - **Ready:** For manual testing in WebStorm IDE
 7. Create API error handling tests: `src/__tests__/api/error-handling.test.ts`
-8. Run `pnpm test src/__tests__/api/` to verify API tests pass
+8. Run `pnpm test src/__tests__/api/` to verify API tests pass (search: 19 ✅, simulate-delay: 29 ✅, posts: 19 ✅, posts-id: 8 ✅)
 9. Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
 10. **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
 
