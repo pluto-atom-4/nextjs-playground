@@ -1,48 +1,58 @@
 ### Data Fetching API - HTTP Client Tests
 ### For use with JetBrains IDE HTTP Client plugin
-### Place requests in this order: Setup → Tests
+### Version: 2.0 - Phase 3 API Routes Manual Testing
+### Purpose: Comprehensive testing of data-fetching API endpoints
 
 @baseUrl = http://localhost:3000/api/data-fetching
 @contentType = application/json
 
 ### ============================================================================
-### SETUP - Get a sample user ID for testing
+### SECTION 0: SETUP - Extract IDs for testing
 ### ============================================================================
+### Run this first to populate variables: firstPostId, firstUserId, newPostId
 
-### 1. List all posts to get user/post IDs
+### 0.1 List all posts to extract user/post IDs
 GET {{baseUrl}}/posts?page=1&limit=5
 
-### Store response for later use
+### Store response values for use in subsequent requests
 > {%
   client.global.set("firstPostId", response.body.posts[0]?.id);
   client.global.set("firstUserId", response.body.posts[0]?.author?.id);
+  console.log("✓ Setup complete:");
+  console.log("  firstPostId:", client.global.get("firstPostId"));
+  console.log("  firstUserId:", client.global.get("firstUserId"));
 %}
 
----
+
 
 ### ============================================================================
-### POSTS API - Read Operations
+### SECTION 1: POSTS API - GET Operations (Read)
 ### ============================================================================
 
-### 2. Get all posts with pagination
+### 1.1 Get all posts with default pagination
 GET {{baseUrl}}/posts
 
-### 3. Get posts with custom pagination
+### 1.2 Get posts with custom pagination (page 1, 20 items)
 GET {{baseUrl}}/posts?page=1&limit=20
 
-### 4. Get posts page 2
+### 1.3 Get posts page 2 with limit of 10
 GET {{baseUrl}}/posts?page=2&limit=10
 
-### 5. Get single post by ID
+### 1.4 Get single post by ID
 GET {{baseUrl}}/posts/{{firstPostId}}
 
----
+### 1.5 Get posts with maximum limit (100)
+GET {{baseUrl}}/posts?page=1&limit=100
+
+### 1.6 Get posts with small limit (5 items)
+GET {{baseUrl}}/posts?page=1&limit=5
+
 
 ### ============================================================================
-### POSTS API - Write Operations
+### SECTION 2: POSTS API - POST Operations (Create)
 ### ============================================================================
 
-### 6. Create a new post (requires valid authorId)
+### 2.1 Create a new post (basic - requires valid authorId)
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
 
@@ -53,31 +63,108 @@ Content-Type: {{contentType}}
 }
 
 > {%
-  client.global.set("newPostId", response.body.id);
+  if (response.status === 201 || response.status === 200) {
+    client.global.set("newPostId", response.body.id);
+    console.log("✓ Post created with ID:", client.global.get("newPostId"));
+  } else {
+    console.error("✗ Failed to create post:", response.status);
+  }
 %}
 
-### 7. Update post (if newPostId was created)
-PUT {{baseUrl}}/posts/{{newPostId}}
+### 2.2 Create another post (for testing updates and deletions)
+POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
 
 {
-  "title": "Updated: HTTP Client Test Post",
-  "content": "This post was updated using the JetBrains HTTP Client"
+  "title": "Test Post for Updates",
+  "content": "This is a test post that will be updated",
+  "authorId": "{{firstUserId}}"
 }
 
-### 8. Delete post (if newPostId was created)
-DELETE {{baseUrl}}/posts/{{newPostId}}
+> {%
+  if (response.status === 201 || response.status === 200) {
+    client.global.set("updateTestPostId", response.body.id);
+    console.log("✓ Post for update created with ID:", client.global.get("updateTestPostId"));
+  }
+%}
 
----
+### 2.3 Create another post (for deletion testing)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Test Post for Deletion",
+  "content": "This post will be deleted to test the DELETE endpoint",
+  "authorId": "{{firstUserId}}"
+}
+
+> {%
+  if (response.status === 201 || response.status === 200) {
+    client.global.set("deleteTestPostId", response.body.id);
+    console.log("✓ Post for deletion created with ID:", client.global.get("deleteTestPostId"));
+  }
+%}
+
 
 ### ============================================================================
-### COMMENTS API
+### SECTION 3: POSTS API - PUT Operations (Update)
 ### ============================================================================
 
-### 9. Get comments for a post
+### 3.1 Update post title and content
+PUT {{baseUrl}}/posts/{{updateTestPostId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated: Test Post for Updates",
+  "content": "This post has been successfully updated with new content"
+}
+
+### 3.2 Update only the title
+PUT {{baseUrl}}/posts/{{updateTestPostId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated Only Title"
+}
+
+### 3.3 Update only the content
+PUT {{baseUrl}}/posts/{{updateTestPostId}}
+Content-Type: {{contentType}}
+
+{
+  "content": "Only the content has been updated"
+}
+
+
+
+### ============================================================================
+### SECTION 4: POSTS API - DELETE Operations
+### ============================================================================
+
+### 4.1 Delete a post (uses deleteTestPostId)
+DELETE {{baseUrl}}/posts/{{deleteTestPostId}}
+
+> {%
+  if (response.status === 200) {
+    console.log("✓ Post deleted successfully");
+    client.global.set("deleteTestPostId", null);
+  } else {
+    console.error("✗ Failed to delete post:", response.status);
+  }
+%}
+
+### 4.2 Verify deleted post returns 404
+GET {{baseUrl}}/posts/{{deleteTestPostId}}
+
+
+### ============================================================================
+### SECTION 5: COMMENTS API (if implemented)
+### ============================================================================
+
+### 5.1 Get comments for a post
 GET {{baseUrl}}/posts/{{firstPostId}}/comments
 
-### 10. Create a comment (requires valid authorId)
+### 5.2 Create a comment (requires valid authorId)
 POST {{baseUrl}}/posts/{{firstPostId}}/comments
 Content-Type: {{contentType}}
 
@@ -86,67 +173,96 @@ Content-Type: {{contentType}}
   "authorId": "{{firstUserId}}"
 }
 
----
 
 ### ============================================================================
-### SEARCH API
+### SECTION 6: SEARCH API
 ### ============================================================================
 
-### 11. Search for posts (basic search)
+### 6.1 Search for posts (basic search)
 GET {{baseUrl}}/search?q=data&limit=10
 
-### 12. Search with single word
+### 6.2 Search with single word
 GET {{baseUrl}}/search?q=fetching
 
-### 13. Search with custom limit
+### 6.3 Search with custom limit
 GET {{baseUrl}}/search?q=react&limit=5
 
-### 14. Search with no results (edge case)
+### 6.4 Search with multiple words
+GET {{baseUrl}}/search?q=test%20post
+
+### 6.5 Search with no results (edge case)
 GET {{baseUrl}}/search?q=nonexistenttermxyz123
 
----
+### 6.6 Search with maximum limit (100)
+GET {{baseUrl}}/search?q=post&limit=100
+
+### 6.7 Search with minimal limit (1)
+GET {{baseUrl}}/search?q=test&limit=1
+
 
 ### ============================================================================
-### METRICS API
+### SECTION 7: SIMULATE DELAY API (for Suspense/Loading State Testing)
 ### ============================================================================
 
-### 15. Get performance metrics and database stats
-GET {{baseUrl}}/metrics
-
----
-
-### ============================================================================
-### SIMULATE DELAY API
-### ============================================================================
-
-### 16. Simulate 1-second delay (default)
+### 7.1 Simulate default 1-second delay
 GET {{baseUrl}}/simulate-delay
 
-### 17. Simulate 3-second delay
+### 7.2 Simulate 500ms delay (short)
+GET {{baseUrl}}/simulate-delay?delay=500
+
+### 7.3 Simulate 2-second delay
+GET {{baseUrl}}/simulate-delay?delay=2000
+
+### 7.4 Simulate 3-second delay
 GET {{baseUrl}}/simulate-delay?delay=3000
 
-### 18. Simulate 5-second delay
+### 7.5 Simulate 5-second delay (for streaming tests)
 GET {{baseUrl}}/simulate-delay?delay=5000
 
-### 19. Simulate delay with category parameter
+### 7.6 Simulate maximum allowed delay (30 seconds)
+GET {{baseUrl}}/simulate-delay?delay=30000
+
+### 7.7 Simulate delay with category parameter
 GET {{baseUrl}}/simulate-delay?delay=2000&category=demo
 
----
+### 7.8 Simulate delay with another category
+GET {{baseUrl}}/simulate-delay?delay=3000&category=performance
+
 
 ### ============================================================================
-### ERROR SCENARIOS - Test Error Handling
+### SECTION 8: METRICS API (Performance & Stats)
 ### ============================================================================
 
-### 20. Invalid pagination (negative page)
+### 8.1 Get performance metrics and database stats
+GET {{baseUrl}}/metrics
+
+
+### ============================================================================
+### SECTION 9: ERROR SCENARIOS - Test Error Handling
+### ============================================================================
+### Tests for 400, 404, 500 error responses
+
+### 9.1 Invalid pagination (negative page)
 GET {{baseUrl}}/posts?page=-1
 
-### 21. Invalid pagination (non-numeric limit)
+### 9.2 Invalid pagination (non-numeric limit)
 GET {{baseUrl}}/posts?page=1&limit=abc
 
-### 22. Get non-existent post
+### 9.3 Invalid pagination (page as non-numeric)
+GET {{baseUrl}}/posts?page=xyz&limit=10
+
+### 9.4 Get non-existent post (404)
 GET {{baseUrl}}/posts/nonexistent-id-123
 
-### 23. Create post without required fields
+### 9.5 Create post without title (400 - missing field)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "content": "Missing title and authorId"
+}
+
+### 9.6 Create post without content (400 - missing field)
 POST {{baseUrl}}/posts
 Content-Type: {{contentType}}
 
@@ -154,40 +270,221 @@ Content-Type: {{contentType}}
   "title": "Missing content and authorId"
 }
 
-### 24. Search without query parameter
+### 9.7 Create post without authorId (400 - missing field)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Missing authorId",
+  "content": "Test content"
+}
+
+### 9.8 Create post with empty body (400)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+}
+
+### 9.9 Create post with invalid authorId (404)
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Invalid author",
+  "content": "Test content",
+  "authorId": "invalid-author-id-123456"
+}
+
+### 9.10 Search without query parameter (400)
 GET {{baseUrl}}/search
 
-### 25. Invalid delay parameter
+### 9.11 Search with empty query
+GET {{baseUrl}}/search?q=
+
+### 9.12 Invalid delay parameter (non-numeric)
 GET {{baseUrl}}/simulate-delay?delay=invalid
 
-### 26. Delay exceeds maximum (31 seconds)
+### 9.13 Delay exceeds maximum (31 seconds - should fail)
 GET {{baseUrl}}/simulate-delay?delay=31000
 
-### 27. Update post with no fields
+### 9.14 Update non-existent post (404)
+PUT {{baseUrl}}/posts/nonexistent-id-123
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated title"
+}
+
+### 9.15 Update post with empty body (400)
 PUT {{baseUrl}}/posts/{{firstPostId}}
 Content-Type: {{contentType}}
 
 {
 }
 
----
+### 9.16 Delete non-existent post (404)
+DELETE {{baseUrl}}/posts/nonexistent-id-123
+
+
 
 ### ============================================================================
-### NOTES
+### SECTION 10: ADVANCED TESTING - Response Validation
 ### ============================================================================
 
-# Before running these requests:
-# 1. Start the dev server: pnpm dev
-# 2. Ensure database is populated: pnpm seed
-# 3. Open this file in WebStorm and use Ctrl+Alt+Enter to run a request
-#    (or click the green arrow on the left side of each request)
+### 10.1 Verify pagination response structure
+GET {{baseUrl}}/posts?page=1&limit=10
 
-# Request Syntax:
-# - Use ### to separate requests
-# - Use @variable = value to define variables
-# - Use {{variable}} to reference variables
-# - Use > {% %} blocks for response handling and variable assignment
+> {%
+  const body = response.body;
+  console.log("Response Structure Validation:");
+  console.log("  ✓ has 'posts':", Array.isArray(body.posts));
+  console.log("  ✓ has 'pagination':", body.pagination !== undefined);
+  console.log("  ✓ has 'total':", typeof body.pagination?.total === 'number');
+  console.log("  ✓ has 'page':", typeof body.pagination?.page === 'number');
+  console.log("  ✓ has 'limit':", typeof body.pagination?.limit === 'number');
+  console.log("  ✓ posts length:", body.posts.length);
+%}
 
-# For more info on HTTP Client:
-# https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+### 10.2 Verify single post response includes author and comments
+GET {{baseUrl}}/posts/{{firstPostId}}
+
+> {%
+  const post = response.body;
+  console.log("Post Detail Validation:");
+  console.log("  ✓ has 'id':", post.id !== undefined);
+  console.log("  ✓ has 'title':", post.title !== undefined);
+  console.log("  ✓ has 'content':", post.content !== undefined);
+  console.log("  ✓ has 'author':", post.author !== undefined);
+  console.log("  ✓ author has 'email':", post.author?.email !== undefined);
+  console.log("  ✓ has '_count.comments':", post._count?.comments !== undefined);
+%}
+
+### 10.3 Verify created post response structure
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Validation Test Post",
+  "content": "Testing response structure",
+  "authorId": "{{firstUserId}}"
+}
+
+> {%
+  const post = response.body;
+  console.log("Create Post Response Validation:");
+  console.log("  ✓ status:", response.status);
+  console.log("  ✓ has 'id':", post.id !== undefined);
+  console.log("  ✓ has 'createdAt':", post.createdAt !== undefined);
+  console.log("  ✓ has 'updatedAt':", post.updatedAt !== undefined);
+  console.log("  ✓ title matches:", post.title === "Validation Test Post");
+  console.log("  ✓ content matches:", post.content === "Testing response structure");
+%}
+
+### 10.4 Verify search response structure
+GET {{baseUrl}}/search?q=test&limit=10
+
+> {%
+  const body = response.body;
+  console.log("Search Response Validation:");
+  console.log("  ✓ has 'results':", Array.isArray(body.results));
+  console.log("  ✓ has 'query':", body.query !== undefined);
+  console.log("  ✓ has 'count':", typeof body.count === 'number');
+  if (body.results.length > 0) {
+    console.log("  ✓ first result has 'id':", body.results[0].id !== undefined);
+    console.log("  ✓ first result has 'title':", body.results[0].title !== undefined);
+    console.log("  ✓ first result has 'author':", body.results[0].author !== undefined);
+  }
+%}
+
+### 10.5 Verify simulate-delay response structure
+GET {{baseUrl}}/simulate-delay?delay=1000
+
+> {%
+  const body = response.body;
+  console.log("Simulate-Delay Response Validation:");
+  console.log("  ✓ has 'id':", body.id !== undefined);
+  console.log("  ✓ has 'delay':", typeof body.delay === 'number');
+  console.log("  ✓ has 'actualDelay':", typeof body.actualDelay === 'number');
+  console.log("  ✓ has 'category':", body.category !== undefined);
+  console.log("  ✓ delay ~= actualDelay (±50ms):", Math.abs(body.delay - body.actualDelay) < 100);
+%}
+
+
+### ============================================================================
+### DOCUMENTATION & USAGE GUIDE
+### ============================================================================
+
+# ⚡ QUICK START
+# 1. Start dev server:          pnpm dev
+# 2. Seed database:              pnpm seed
+# 3. Open this file in WebStorm
+# 4. Use Ctrl+Alt+Enter to run requests (or click green arrow)
+
+# 📋 FILE ORGANIZATION
+# Section 0: SETUP - Extract IDs (run first!)
+# Section 1: GET Operations - Read posts
+# Section 2: POST Operations - Create posts
+# Section 3: PUT Operations - Update posts
+# Section 4: DELETE Operations - Delete posts
+# Section 5: COMMENTS API - If implemented
+# Section 6: SEARCH API - Post search
+# Section 7: SIMULATE DELAY - For loading state testing
+# Section 8: METRICS API - Performance stats
+# Section 9: ERROR SCENARIOS - Error handling tests
+# Section 10: ADVANCED - Response validation scripts
+
+# 🔑 VARIABLE REFERENCE
+# @baseUrl = http://localhost:3000/api/data-fetching
+# @contentType = application/json
+# firstPostId = Populated by Section 0 request 0.1
+# firstUserId = Populated by Section 0 request 0.1
+# newPostId = Populated by Section 2 requests
+# updateTestPostId = Populated by Section 2 request 2.2
+# deleteTestPostId = Populated by Section 2 request 2.3
+
+# 💡 TIPS & TRICKS
+# - Use Ctrl+Alt+Enter or click the green arrow to execute a request
+# - Response appears in right panel with tabs: Response, Headers, Cookies
+# - Use > {% %} blocks to extract and store variables from responses
+# - Run Section 0 first to populate testing variables
+# - Test error scenarios in Section 9 to verify error handling
+# - Use Section 10 advanced tests to validate response structures
+
+# 🧪 TESTING WORKFLOW
+# 1. Run Section 0.1 to extract firstPostId and firstUserId
+# 2. Run Section 1 tests to verify GET operations
+# 3. Run Section 2 tests to create test posts
+# 4. Run Section 3 tests to verify PUT operations (uses updateTestPostId)
+# 5. Run Section 4 tests to verify DELETE operations
+# 6. Run Section 6 tests to verify search functionality
+# 7. Run Section 7 tests to verify delay simulation
+# 8. Run Section 9 tests to verify error handling
+# 9. Run Section 10 tests to validate response structures
+
+# 📖 HTTP CLIENT SYNTAX REFERENCE
+# GET {{baseUrl}}/path
+# POST {{baseUrl}}/path
+# Content-Type: {{contentType}}
+# { "field": "value" }
+#
+# Response Handling:
+# > {%
+#   client.global.set("varName", value);
+#   console.log("Message");
+# %}
+
+# 🔗 RELATED FILES
+# - Route Implementation: src/app/api/data-fetching/*/route.ts
+# - Test Suite: src/__tests__/api/data-fetching/*.test.ts
+# - Error Handling: src/__tests__/api/error-handling.test.ts
+# - Database Setup: docs/database-setup.md
+# - Implementation Plan: docs/implent-plan-fetching-data.md
+# - Test Plan: docs/test-plan.md
+
+# 📚 REFERENCE DOCUMENTATION
+# - JetBrains HTTP Client: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+# - Next.js API Routes: https://nextjs.org/docs/app/building-your-application/routing/route-handlers
+# - Prisma Documentation: https://www.prisma.io/docs/
+# - React Query: https://tanstack.com/query/latest
 
