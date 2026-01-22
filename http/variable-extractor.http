@@ -1,0 +1,154 @@
+### HTTP Client Variable Setup Helper
+### Purpose: Initialize and populate all variables needed for data-fetching-api.http
+### Instructions: Run these requests FIRST before running the main test suite
+
+@baseUrl = http://localhost:3000/api/data-fetching
+@contentType = application/json
+
+### ============================================================================
+### PHASE 1: VALIDATE DATABASE & EXTRACT IDs
+### ============================================================================
+### Run this section first to populate all variables
+
+### SETUP 1: Fetch posts to extract firstPostId and firstUserId
+### Status: ✅ Run this request FIRST
+### Populates: firstPostId, firstUserId
+GET {{baseUrl}}/posts?page=1&limit=1
+
+> {%
+  const hasData = response.body.posts && response.body.posts.length > 0;
+
+  if (hasData) {
+    const post = response.body.posts[0];
+    client.global.set("firstPostId", post.id);
+    client.global.set("firstUserId", post.author?.id);
+
+    console.log("✅ SUCCESS: Variables populated from existing posts");
+    console.log("  firstPostId:", client.global.get("firstPostId"));
+    console.log("  firstUserId:", client.global.get("firstUserId"));
+  } else {
+    console.error("❌ ERROR: No posts found in database. Run SETUP 2 first.");
+  }
+%}
+
+
+### ============================================================================
+### PHASE 2: CREATE TEST DATA FOR REMAINING VARIABLES
+### ============================================================================
+### Only run these if SETUP 1 was successful and populated firstUserId
+
+### SETUP 2: Create a test post for updateTestPostId
+### Status: ⏳ Run after SETUP 1
+### Populates: updateTestPostId
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Variable Setup - Update Test Post",
+  "content": "This post is used to populate updateTestPostId variable for testing PUT operations",
+  "authorId": "{{firstUserId}}"
+}
+
+> {%
+  if (response.status === 201 || response.status === 200) {
+    client.global.set("updateTestPostId", response.body.id);
+    console.log("✅ SUCCESS: updateTestPostId created");
+    console.log("  ID:", client.global.get("updateTestPostId"));
+  } else {
+    console.error("❌ ERROR: Failed to create updateTestPostId post");
+    console.error("  Status:", response.status);
+    console.error("  Response:", response.body);
+  }
+%}
+
+
+### SETUP 3: Create a test post for deleteTestPostId
+### Status: ⏳ Run after SETUP 1
+### Populates: deleteTestPostId
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Variable Setup - Delete Test Post",
+  "content": "This post is used to populate deleteTestPostId variable for testing DELETE operations",
+  "authorId": "{{firstUserId}}"
+}
+
+> {%
+  if (response.status === 201 || response.status === 200) {
+    client.global.set("deleteTestPostId", response.body.id);
+    console.log("✅ SUCCESS: deleteTestPostId created");
+    console.log("  ID:", client.global.get("deleteTestPostId"));
+  } else {
+    console.error("❌ ERROR: Failed to create deleteTestPostId post");
+    console.error("  Status:", response.status);
+    console.error("  Response:", response.body);
+  }
+%}
+
+
+### ============================================================================
+### PHASE 3: VERIFY ALL VARIABLES ARE SET
+### ============================================================================
+### Run this to verify all variables are ready before running main tests
+
+### SETUP 4: Verify all variables (Diagnostic)
+### Status: ✅ Run last to verify setup
+### Output: Console log showing all populated variables
+GET {{baseUrl}}/posts?page=1&limit=1
+
+> {%
+  const vars = {
+    baseUrl: client.global.get("baseUrl") || "{{baseUrl}}",
+    firstPostId: client.global.get("firstPostId"),
+    firstUserId: client.global.get("firstUserId"),
+    updateTestPostId: client.global.get("updateTestPostId"),
+    deleteTestPostId: client.global.get("deleteTestPostId")
+  };
+
+  const allSet = vars.firstPostId && vars.firstUserId &&
+                 vars.updateTestPostId && vars.deleteTestPostId;
+
+  console.log("📊 VARIABLE STATUS REPORT");
+  console.log("═".repeat(50));
+  console.log("✅ baseUrl:", vars.baseUrl);
+  console.log(vars.firstPostId ? "✅" : "❌", "firstPostId:", vars.firstPostId || "NOT SET");
+  console.log(vars.firstUserId ? "✅" : "❌", "firstUserId:", vars.firstUserId || "NOT SET");
+  console.log(vars.updateTestPostId ? "✅" : "❌", "updateTestPostId:", vars.updateTestPostId || "NOT SET");
+  console.log(vars.deleteTestPostId ? "✅" : "❌", "deleteTestPostId:", vars.deleteTestPostId || "NOT SET");
+  console.log("═".repeat(50));
+
+  if (allSet) {
+    console.log("✨ ALL VARIABLES SET - Ready to run data-fetching-api.http");
+  } else {
+    console.log("⚠️ MISSING VARIABLES - Run previous setup requests");
+  }
+%}
+
+
+### ============================================================================
+### REFERENCE: VARIABLE LIFECYCLE
+### ============================================================================
+###
+### Variable Name          | Source                | Used In               | Type
+### ─────────────────────────────────────────────────────────────────────────
+### baseUrl                | @baseUrl at top       | All requests          | Static
+### contentType            | @contentType at top   | POST/PUT headers      | Static
+### firstPostId            | SETUP 1 response      | Sections 1.4, 5, 10   | Dynamic
+### firstUserId            | SETUP 1 response      | All POST requests     | Dynamic
+### updateTestPostId       | SETUP 2 response      | Section 3 (PUT)       | Dynamic
+### deleteTestPostId       | SETUP 3 response      | Section 4 (DELETE)    | Dynamic
+###
+### ============================================================================
+### QUICK START WORKFLOW
+### ============================================================================
+###
+### 1. Open this file (http/variable-extractor.http)
+### 2. Run SETUP 1 to fetch existing posts
+### 3. Run SETUP 2 to create updateTestPostId
+### 4. Run SETUP 3 to create deleteTestPostId
+### 5. Run SETUP 4 to verify all variables
+### 6. Switch to data-fetching-api.http and run tests
+###
+### ============================================================================
+

@@ -543,7 +543,35 @@ model Comment {
    - **Total API Tests:** 119/119 passing ✅
    - **Execution Time:** ~52 seconds total (includes timed delays)
    - **Coverage:** 100% of API endpoints and error paths
-9. Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
+9. ✅ **COMPLETE** - Manually test with JetBrains HTTP Client (start `pnpm dev`, open `.http` file in IDE)
+   - **File:** `http/data-fetching-api.http` (v2.0 - Comprehensive)
+   - **Total Requests:** 50+ organized by section
+   - **Sections:**
+     - Section 0: Setup - Extract IDs for testing (1 request)
+     - Section 1: GET Operations - Read posts (6 requests)
+     - Section 2: POST Operations - Create posts (3 requests)
+     - Section 3: PUT Operations - Update posts (3 requests)
+     - Section 4: DELETE Operations - Delete posts (2 requests)
+     - Section 5: COMMENTS API - If implemented (2 requests)
+     - Section 6: SEARCH API - Post search (7 requests)
+     - Section 7: SIMULATE DELAY - For loading testing (8 requests)
+     - Section 8: METRICS API - Performance stats (1 request)
+     - Section 9: ERROR SCENARIOS - Error handling (16 requests)
+     - Section 10: ADVANCED - Response validation with scripts (5 requests)
+   - **Features:**
+     - Variable extraction and storage using response handlers
+     - Automated logging with ✓/✗ indicators
+     - Response structure validation scripts
+     - Comprehensive error scenario testing
+     - Organized by HTTP method and functionality
+   - **Usage:**
+     - Start dev server: `pnpm dev`
+     - Start database: `pnpm seed`
+     - Open `http/data-fetching-api.http` in WebStorm
+     - Run Section 0 first to populate variables
+     - Use Ctrl+Alt+Enter or click green arrow to execute requests
+   - **Testing Workflow:** 9-step process documented in file
+   - **Reference:** See comments in `http/data-fetching-api.http` for detailed instructions
 10. **Reference:** See `test-plan.md` Phase 3 for detailed API testing specifications
 
 ### Phase 4: Route Sections (Build in Priority Order)
