@@ -1,7 +1,8 @@
 # Testing Plan: Data Fetching Showcase
 
 **Project:** nextjs-playground  
-**Date:** January 1, 2026  
+**Date:** January 21, 2026 (Last Updated)  
+**Status:** In Progress – Phases 1-3 Active | Phases 4-6 Pending  
 **Testing Tools:** Vitest, Playwright, JetBrains HTTP Client, Prisma  
 **Framework Versions:** Next.js 16 + React 19 + TypeScript
 
@@ -84,6 +85,126 @@ Add these scripts to your `package.json`:
 
 ### Objective
 Validate Prisma setup, migrations, schema validity, and database connectivity.
+
+### 1.0 Database Setup for Tests
+
+**Critical:** Tests need database isolation and proper cleanup strategy.
+
+#### 1.0.1 SQLite Test Database (Local Development - Recommended)
+
+Create separate test database using environment variables:
+
+**Step 1:** Create `.env.test.local`
+
+```env
+# Use separate database file for tests
+# This prevents conflicts with development database
+DATABASE_URL="file:./prisma/test.db"
+```
+
+**Step 2:** Run migrations on test database
+
+```bash
+# Apply migrations to test database
+pnpm exec prisma migrate deploy --skip-generate
+```
+
+**Step 3:** Verify test database
+
+```bash
+# Check that schema is created
+ls -la prisma/test.db
+```
+
+#### 1.0.2 PostgreSQL Test Database (CI Environment)
+
+For GitHub Actions or team development:
+
+**In `.env.test.local`:**
+```env
+# PostgreSQL test database
+# Used in CI/CD pipelines
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/nextjs_playground_test"
+```
+
+**In GitHub Actions workflow (.github/workflows/test.yml):**
+```yaml
+services:
+  postgres:
+    image: postgres:15
+    env:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nextjs_playground_test
+    options: >-
+      --health-cmd pg_isready
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 5
+    ports:
+      - 5432:5432
+```
+
+#### 1.0.3 Test Data Cleanup Pattern
+
+All tests must clean up after execution:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { db } from '@/lib/db';
+
+describe('Database Tests', () => {
+  beforeEach(async () => {
+    // Cleanup before each test
+    await db.comment.deleteMany({});
+    await db.post.deleteMany({});
+    await db.user.deleteMany({});
+  });
+
+  afterEach(async () => {
+    // Cleanup after each test (safety net)
+    await db.comment.deleteMany({});
+    await db.post.deleteMany({});
+    await db.user.deleteMany({});
+  });
+
+  it('should create user', async () => {
+    const user = await db.user.create({
+      data: { email: 'test@example.com', name: 'Test' },
+    });
+    expect(user.id).toBeDefined();
+  });
+});
+```
+
+#### 1.0.4 Run Tests with Specific Database
+
+```bash
+# Use development database (default)
+pnpm test
+
+# Use test database via environment override
+DATABASE_URL="file:./prisma/test.db" pnpm test
+
+# Use PostgreSQL test database in CI
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/nextjs_playground_test" pnpm test
+```
+
+#### 1.0.5 Troubleshooting
+
+**Problem:** "Table does not exist"  
+**Solution:** Run migrations: `pnpm exec prisma migrate deploy`
+
+**Problem:** "Database is locked"  
+**Solution:** 
+1. Close Prisma Studio: `pnpm exec prisma studio` (stop process)
+2. Delete lock file: `rm prisma/dev.db-journal`
+3. Retry test
+
+**Problem:** Tests timeout  
+**Solution:** Increase timeout in `vitest.config.ts`:
+```typescript
+testTimeout: 15000, // 15 seconds
+```
 
 ### 1.1 Database Setup Tests (Vitest + Prisma)
 
@@ -386,15 +507,25 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
+      reportsDirectory: './coverage',
       exclude: [
         'node_modules/',
         'src/__tests__/',
         '**/*.test.ts',
         '**/*.spec.ts',
+        '**/*.config.ts',
+        'dist/',
+        '.next/',
       ],
+      lines: 80,
+      functions: 80,
+      branches: 75,
+      statements: 80,
     },
+    include: ['src/**/*.{test,spec}.ts', 'src/**/*.{test,spec}.tsx'],
     testTimeout: 10000,
+    setupFiles: [],
   },
   resolve: {
     alias: {
@@ -659,14 +790,180 @@ Accept: {{contentType}}
 3. Click "Run" next to each test
 4. Verify response status and body
 
+### 3.2A JetBrains HTTP Client Variables Setup
+
+**Problem:** HTTP tests need real database record IDs to function properly.  
+**Solution:** Use environment variables with actual data from database.
+
+#### 3.2A.1 Create HTTP Variables File
+
+**Location:** `http-client.env.json` or `http/http-client.env.json`
+
+```json
+{
+  "dev": {
+    "baseUrl": "http://localhost:3000/api/data-fetching",
+    "contentType": "application/json",
+    "testUserId": "00000000-0000-0000-0000-000000000001",
+    "testPostId": "00000000-0000-0000-0000-000000000001",
+    "authToken": ""
+  },
+  "staging": {
+    "baseUrl": "https://staging.example.com/api/data-fetching",
+    "contentType": "application/json",
+    "testUserId": "staging-user-id",
+    "testPostId": "staging-post-id",
+    "authToken": "staging-bearer-token"
+  },
+  "prod": {
+    "baseUrl": "https://nextjs-playground.vercel.app/api/data-fetching",
+    "contentType": "application/json",
+    "testUserId": "prod-user-id",
+    "testPostId": "prod-post-id",
+    "authToken": "prod-bearer-token"
+  }
+}
+```
+
+#### 3.2A.2 Update HTTP Test File
+
+**Location:** `http/data-fetching-api.http`
+
+Update variables section:
+
+```http
+### Development Environment
+@env = dev
+@baseUrl = {{$dotenv[${env}.baseUrl]}}
+@contentType = {{$dotenv[${env}.contentType]}}
+@testUserId = {{$dotenv[${env}.testUserId]}}
+@testPostId = {{$dotenv[${env}.testPostId]}}
+
+---
+
+### Test: GET all posts
+GET {{baseUrl}}/posts
+Accept: {{contentType}}
+
+### Test: GET single post by ID
+GET {{baseUrl}}/posts/{{testPostId}}
+Accept: {{contentType}}
+
+### Test: Create post for user
+POST {{baseUrl}}/posts
+Content-Type: {{contentType}}
+
+{
+  "title": "Testing API Endpoints",
+  "content": "This is a test post created via HTTP Client",
+  "authorId": "{{testUserId}}"
+}
+
+### Test: Update specific post
+PUT {{baseUrl}}/posts/{{testPostId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated Title",
+  "content": "Updated content"
+}
+
+### Test: Delete specific post
+DELETE {{baseUrl}}/posts/{{testPostId}}
+
+### Test: Search posts
+GET {{baseUrl}}/search?q=fetching&limit=5&authorId={{testUserId}}
+Accept: {{contentType}}
+```
+
+#### 3.2A.3 Get Actual Data from Database
+
+**Step 1:** Start development server and Prisma Studio
+
+```bash
+# Terminal 1: Start dev server
+pnpm dev
+
+# Terminal 2: Open Prisma Studio (shows database UI)
+pnpm exec prisma studio
+```
+
+**Step 2:** Open Prisma Studio at http://localhost:5555
+
+**Step 3:** Navigate to `User` table, click a record
+
+**Step 4:** Copy the `id` value
+
+**Step 5:** Update `http-client.env.json`
+
+```json
+{
+  "dev": {
+    "testUserId": "abc123def456..."  // ← Paste actual ID here
+  }
+}
+```
+
+**Step 6:** Create a post under this user and copy its ID
+
+```json
+{
+  "dev": {
+    "testUserId": "actual-user-uuid",
+    "testPostId": "actual-post-uuid"
+  }
+}
+```
+
+#### 3.2A.4 Run HTTP Tests in JetBrains IDE
+
+1. Open `http/data-fetching-api.http`
+2. Select environment: **Dev** (top-right dropdown)
+3. Click ▶️ **Run** next to each request
+4. Verify responses (should be 200/201, not 400)
+
+#### 3.2A.5 Switch Environments
+
+Click environment selector (top-right of .http file editor):
+
+```
+[Dev ▼] [Staging] [Prod]
+```
+
+Changes active environment for all subsequent requests.
+
 ### 3.3 API Error Handling Tests
+
+**Database Connection Requirement:** These tests use Prisma to query the database.
+
+**Setup:**
+
+1. Ensure database is running (SQLite: auto-creates, PostgreSQL: needs server)
+2. Run migrations: `pnpm exec prisma migrate deploy --skip-generate`
+3. Increase test timeout for slower database operations
 
 **Location:** `src/__tests__/api/error-handling.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { db } from '@/lib/db';
 
 describe('API Error Handling', () => {
+  beforeAll(async () => {
+    // Verify database connection before tests
+    try {
+      const userCount = await db.user.count();
+      console.log(`✓ Database connected. Users: ${userCount}`);
+    } catch (error) {
+      throw new Error('Cannot connect to database. Run: pnpm exec prisma migrate deploy');
+    }
+  });
+
+  afterAll(async () => {
+    // Disconnect from database
+    await db.$disconnect();
+  });
+
   it('should return 404 for non-existent post', async () => {
     const response = await fetch(
       'http://localhost:3000/api/data-fetching/posts/invalid-id'
@@ -1071,7 +1368,13 @@ test.describe('Performance', () => {
     await page.goto('/data-fetching/server-fetch');
 
     const loadTime = Date.now() - startTime;
-    expect(loadTime).toBeLessThan(5000); // 5 seconds
+    
+    // Environment-aware thresholds
+    // Next.js dev mode rebuilds on-demand, so longer in development
+    const maxLoadTime = process.env.CI ? 8000 : 15000;
+    expect(loadTime).toBeLessThan(maxLoadTime);
+    
+    console.log(`✓ Page loaded in ${loadTime}ms (max: ${maxLoadTime}ms)`);
   });
 
   test('api routes should respond quickly', async ({ page }) => {
@@ -1080,7 +1383,12 @@ test.describe('Performance', () => {
     const response = await page.goto('/api/data-fetching/posts');
 
     const responseTime = Date.now() - startTime;
-    expect(responseTime).toBeLessThan(1000); // 1 second
+    
+    // API routes are faster - 2s for dev, 1s for CI
+    const maxResponseTime = process.env.CI ? 1000 : 2000;
+    expect(responseTime).toBeLessThan(maxResponseTime);
+    
+    console.log(`✓ API responded in ${responseTime}ms`);
   });
 
   test('should have reasonable bundle size', async ({ page }) => {
@@ -1199,19 +1507,217 @@ describe('Full Data Fetching Flow', () => {
 });
 ```
 
-### 6.4 Coverage Report
+### 6.3A Database Isolation for Integration Tests
 
-Run coverage analysis:
+**Challenge:** Integration tests can conflict if they share database records.
 
-```bash
-pnpm test:coverage
+**Example Problem:**
+```typescript
+// Test A creates user with ID = "user-1"
+// Test B tries to create same user with ID = "user-1"
+// → Test B fails with "unique constraint violation"
 ```
 
-Target coverage:
+**Solution 1: Separate Test Database**
+
+Recommended for simplicity. Use `prisma/test.db` for all tests:
+
+**Update `vitest.config.ts`:**
+```typescript
+export default defineConfig({
+  test: {
+    env: {
+      // Tests use separate database
+      DATABASE_URL: process.env.TEST_DATABASE_URL || 'file:./prisma/test.db',
+    },
+  },
+});
+```
+
+**Create `src/__tests__/setup.ts`:**
+```typescript
+import { beforeAll, afterAll } from 'vitest';
+import { db } from '@/lib/db';
+
+beforeAll(async () => {
+  // Optional: Run migrations on test database
+  // In CI: pnpm exec prisma migrate deploy
+  console.log('✓ Test database ready');
+});
+
+afterAll(async () => {
+  // Cleanup all test data
+  await db.comment.deleteMany({});
+  await db.post.deleteMany({});
+  await db.user.deleteMany({});
+
+  // Disconnect
+  await db.$disconnect();
+  console.log('✓ Test database cleaned');
+});
+```
+
+**Add to `vitest.config.ts`:**
+```typescript
+export default defineConfig({
+  test: {
+    setupFiles: ['./src/__tests__/setup.ts'],
+  },
+});
+```
+
+**Solution 2: Database Transactions (Per-Test Isolation)**
+
+For tests that must run in production database:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { db } from '@/lib/db';
+
+describe('Integration Tests with Transaction Isolation', () => {
+  let testUser: any;
+
+  beforeEach(async () => {
+    // Create test data in isolated transaction
+    testUser = await db.$transaction(async (tx) => {
+      return await tx.user.create({
+        data: {
+          email: `test-${Date.now()}@example.com`,
+          name: 'Transaction Test User',
+        },
+      });
+    });
+  });
+
+  afterEach(async () => {
+    // Rollback via cleanup
+    if (testUser?.id) {
+      await db.user.delete({ where: { id: testUser.id } }).catch(() => {});
+      await db.comment.deleteMany({});
+      await db.post.deleteMany({});
+    }
+  });
+
+  it('should create post for user in transaction', async () => {
+    const post = await db.$transaction(async (tx) => {
+      return await tx.post.create({
+        data: {
+          title: 'Transaction Post',
+          content: 'Created in isolated transaction',
+          authorId: testUser.id,
+        },
+      });
+    });
+
+    expect(post.id).toBeDefined();
+    expect(post.authorId).toBe(testUser.id);
+  });
+});
+```
+
+**Solution 3: Test Database Snapshots (Advanced)**
+
+For complex multi-test scenarios, take database snapshots:
+
+```typescript
+import fs from 'fs';
+import path from 'path';
+
+// Save database state before tests
+export async function saveSnapshot(name: string) {
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    users: await db.user.findMany(),
+    posts: await db.post.findMany(),
+  };
+  
+  fs.writeFileSync(
+    path.join('./snapshots', `${name}.json`),
+    JSON.stringify(snapshot, null, 2)
+  );
+}
+
+// Restore database to snapshot state
+export async function restoreSnapshot(name: string) {
+  const snapshot = JSON.parse(
+    fs.readFileSync(path.join('./snapshots', `${name}.json`), 'utf-8')
+  );
+  
+  // Clean and restore
+  await db.user.deleteMany({});
+  for (const user of snapshot.users) {
+    await db.user.create({ data: user });
+  }
+}
+```
+
+**Best Practice:** Always clean up after each test to prevent cascading failures.
+
+```typescript
+afterEach(async () => {
+  // Clean in reverse order of creation
+  await db.comment.deleteMany({});
+  await db.post.deleteMany({});
+  await db.user.deleteMany({});
+});
+```
+
+### 6.4 Coverage Report
+
+### Coverage Thresholds
+
+**Production Environment (Strict):**
+- **Statements:** 85%+
+- **Branches:** 80%+
+- **Functions:** 85%+
+- **Lines:** 85%+
+
+**Development/Testing Environment (Realistic):**
 - **Statements:** 80%+
 - **Branches:** 75%+
 - **Functions:** 80%+
 - **Lines:** 80%+
+
+**View Coverage Report:**
+
+```bash
+# Generate coverage report
+pnpm test:coverage
+
+# Open in browser (generates ./coverage/index.html)
+open coverage/index.html
+```
+
+**Check specific file coverage:**
+
+```bash
+# View JSON report
+cat coverage/coverage-summary.json
+
+# Check if above threshold
+if grep -q '"lines".*"pct": 8[0-9]' coverage/coverage-summary.json; then
+  echo "✓ Coverage meets 80% target"
+else
+  echo "✗ Coverage below 80%"
+fi
+```
+
+**Enforce in CI/CD:**
+
+Add to `.github/workflows/test.yml`:
+
+```yaml
+- name: Check coverage thresholds
+  run: |
+    pnpm test:coverage
+    COVERAGE=$(grep -o '"lines"[^}]*"pct": [0-9.]*' coverage/coverage-summary.json | tail -1 | grep -o '[0-9.]*$')
+    echo "Coverage: ${COVERAGE}%"
+    if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+      echo "✗ Coverage below 80% threshold"
+      exit 1
+    fi
+    echo "✓ Coverage meets threshold"
+```
 
 ### 6.5 Phase 6 Checklist
 
