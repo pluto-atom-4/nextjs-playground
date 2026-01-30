@@ -61,7 +61,7 @@ export default function LoadingSkeleton({
       >
         {Array.from({ length: count }).map((_, i) => (
           <div
-            key={i}
+            key={`skeleton-card-${i}`}
             className="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700"
           >
             <div className={`${baseSkeletonClass} mb-3 w-3/4`} />
@@ -94,7 +94,7 @@ export default function LoadingSkeleton({
         {/* Table rows skeleton */}
         {Array.from({ length: count }).map((_, i) => (
           <div
-            key={i}
+            key={`skeleton-row-${i}`}
             className="flex gap-3"
           >
             <div className="flex-1">
@@ -120,7 +120,7 @@ export default function LoadingSkeleton({
     >
       {Array.from({ length: count }).map((_, i) => (
         <div
-          key={i}
+          key={`skeleton-list-${i}`}
           className={`${baseSkeletonClass} w-full`}
         />
       ))}

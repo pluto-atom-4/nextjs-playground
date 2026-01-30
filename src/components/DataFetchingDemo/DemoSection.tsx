@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 interface DemoSectionProps {
@@ -95,6 +95,7 @@ export default function DemoSection({
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
+              <title>External link icon</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

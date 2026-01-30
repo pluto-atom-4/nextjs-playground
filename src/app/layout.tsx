@@ -26,7 +26,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-4">
                   <SignedOut>
                     <SignInButton mode="modal">
-                      <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                      <button type="button" className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
                         Sign In
                       </button>
                     </SignInButton>

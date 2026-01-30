@@ -2,6 +2,10 @@
 // In Next.js 16 Server Components, 'use cache' at the top of a file
 // enables automatic caching for all exported functions
 
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger({ prefix: 'FILE-CACHE' });
+
 interface CacheMetrics {
   hits: number;
   misses: number;
@@ -16,7 +20,7 @@ let cacheMetrics: CacheMetrics = {
 
 // Simulate an expensive database query with 'use cache'
 export async function getExpensiveData() {
-  console.log('[FILE-CACHE] Fetching expensive data...');
+  logger.debug('Fetching expensive data...');
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -35,7 +39,7 @@ export async function getExpensiveData() {
 
 // Simulate an API call
 export async function fetchUserProfile(userId: string) {
-  console.log(`[FILE-CACHE] Fetching profile for user: ${userId}`);
+  logger.debug(`Fetching profile for user: ${userId}`);
 
   await new Promise((resolve) => setTimeout(resolve, 800));
 

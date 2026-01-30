@@ -196,18 +196,18 @@ describe('Demo Data Factories', () => {
       expect(dataset.comments.length).toBeGreaterThan(0);
 
       // Verify all posts have authors
-      dataset.posts.forEach(post => {
-        const author = dataset.users.find(u => u.id === post.authorId);
+      for (const post of dataset.posts) {
+        const author = dataset.users.find((u) => u.id === post.authorId);
         expect(author).toBeDefined();
-      });
+      }
 
       // Verify all comments have posts and authors
-      dataset.comments.forEach(comment => {
-        const post = dataset.posts.find(p => p.id === comment.postId);
-        const author = dataset.users.find(u => u.id === comment.authorId);
+      for (const comment of dataset.comments) {
+        const post = dataset.posts.find((p) => p.id === comment.postId);
+        const author = dataset.users.find((u) => u.id === comment.authorId);
         expect(post).toBeDefined();
         expect(author).toBeDefined();
-      });
+      }
     });
 
     it('should create a large dataset for pagination testing', () => {

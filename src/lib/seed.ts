@@ -3,14 +3,17 @@
 // Run with: pnpm seed
 
 import { db } from './db';
+import { createLogger } from './logger';
+
+const logger = createLogger({ prefix: 'SEED' });
 
 async function main() {
-  console.log('🌱 Starting database seed...');
+  logger.info('🌱 Starting database seed...');
 
   try {
     // Verify database connection
     await db.$queryRaw`SELECT 1`;
-    console.log('✓ Database connection verified');
+    logger.success('Database connection verified');
 
     // Clear existing data (optional, for development only)
     // await db.comment.deleteMany({});
@@ -32,7 +35,7 @@ async function main() {
       },
     });
 
-    console.log('✓ Users created:', [user1.id, user2.id]);
+    logger.success(`Users created: ${[user1.id, user2.id].join(', ')}`);
 
     // Create posts
     const post1 = await db.post.create({
@@ -62,7 +65,7 @@ async function main() {
       },
     });
 
-    console.log('✓ Posts created:', [post1.id, post2.id, post3.id]);
+    logger.success(`Posts created: ${[post1.id, post2.id, post3.id].join(', ')}`);
 
     // Create comments
     const comment1 = await db.comment.create({
@@ -89,18 +92,18 @@ async function main() {
       },
     });
 
-    console.log('✓ Comments created:', [comment1.id, comment2.id, comment3.id]);
+    logger.success(`Comments created: ${[comment1.id, comment2.id, comment3.id].join(', ')}`);
 
-    console.log('✅ Database seeded successfully!');
+    logger.success('Database seeded successfully!');
   } catch (error) {
-    console.error('❌ Seed error:', error);
+    logger.error('Seed error', error);
     throw error;
   }
 }
 
 main()
   .catch((e) => {
-    console.error('Seed failed:', e);
+    logger.error('Seed failed', e);
     process.exit(1);
   })
   .finally(async () => {

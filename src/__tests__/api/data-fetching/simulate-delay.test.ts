@@ -307,14 +307,14 @@ describe('GET /api/data-fetching/simulate-delay', () => {
       const responses = await Promise.all(requests.map((req) => GET(req)));
       const dataList = await Promise.all(responses.map((res) => res.json()));
 
-      responses.forEach((res) => {
+      for (const res of responses) {
         expect(res.status).toBe(200);
-      });
+      }
 
-      dataList.forEach((data) => {
+      for (const data of dataList) {
         expect(data.delay).toBe(50);
         expect(data.status).toBe('completed');
-      });
+      }
 
       // All should have unique IDs
       const ids = new Set(dataList.map((d) => d.id));

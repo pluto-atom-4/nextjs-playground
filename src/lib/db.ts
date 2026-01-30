@@ -32,7 +32,10 @@ const prismaClientSingleton = () => {
   });
 };
 
-export const db = (globalThis.prisma ??= prismaClientSingleton());
+
+globalThis.prisma ??= prismaClientSingleton();
+
+export const db = globalThis.prisma;
 
 export default db;
 

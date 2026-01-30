@@ -133,7 +133,7 @@ export default function MetricsPanel({
 
           return (
             <div
-              key={index}
+              key={`metric-${metric.label}-${index}`}
               className={`${borderClass} rounded-lg p-4 transition-all hover:shadow-md ${
                 metric.highlight || variant !== 'default'
                   ? variantStyles[variant]
