@@ -34,10 +34,14 @@ jobs:
       - name: Run unit tests
         run: pnpm test
         continue-on-error: true
+        env:
+          DATABASE_URL: "file:./prisma/dev.db"
 
       - name: Generate coverage report
         run: pnpm test:coverage
         continue-on-error: true
+        env:
+          DATABASE_URL: "file:./prisma/dev.db"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
