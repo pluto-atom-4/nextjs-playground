@@ -1,0 +1,344 @@
+name: feature-joy-quiz
+version: 1.0.0
+description: Quizlet-style quiz learning module with multiple choice questions, progress tracking, and persistent storage
+category: features
+tags:
+  - quiz
+  - learning
+  - interactive
+  - react
+  - typescript
+  - tailwindcss
+  - prisma
+
+overview: |
+  A complete quiz learning feature similar to Quizlet Learn Module. Enables users to practice
+  multiple choice quizzes with instant feedback, progress tracking, and the ability to flag
+  questions for later review. Includes real-time visual feedback with auto-advance timer and
+  optional SQLite persistence.
+
+created_at: 2026-01-30
+updated_at: 2026-01-30
+author: Claude Copilot
+status: production
+
+dependencies:
+  - next: ">=16.0.0"
+  - react: ">=19.0.0"
+  - typescript: ">=5.9.0"
+  - tailwindcss: ">=4.0.0"
+  - prisma: ">=7.0.0" # optional for persistence
+
+features:
+  - Multiple choice quiz interface
+  - CSV data loading and parsing
+  - Real-time feedback (green for correct, red for incorrect)
+  - 3-second auto-advance to next question
+  - Progress tracking with visual progress bar
+  - Flag questions for later review
+  - Quiz summary with score and accuracy calculation
+  - Dark/light theme support
+  - SQLite persistence (optional, works offline without it)
+  - Responsive design
+  - Graceful error handling
+
+file_structure: |
+  src/
+  ├── app/
+  │   └── joy-quiz/
+  │       ├── page.tsx              # Main quiz page (client component)
+  │       └── layout.tsx            # Layout wrapper with header & footer
+  ├── components/
+  │   ├── QuizHeader.tsx            # Header: title, theme toggle, back button
+  │   ├── ProgressBar.tsx           # Progress: visual bar (current/total)
+  │   ├── QuizCard.tsx              # Quiz: question, options, feedback
+  │   ├── QuizSummary.tsx           # Summary: score, accuracy, results
+  │   └── QuizFooter.tsx            # Footer: copyright
+  └── lib/
+      ├── quiz-parser.ts           # CSV parsing utility
+      ├── quiz-actions.ts          # Server actions (Prisma operations)
+      ├── quiz-validation.ts       # Type validation helpers
+      └── migrate-quiz.ts          # Database migration helper
+
+  generated/
+  └── media/quizlet/
+      └── quiz1_algorithms_multiple_choice.csv  # Quiz data (25+ questions)
+
+  prisma/
+  └── schema.prisma                 # Updated with QuizSession, UserAnswer, FlaggedQuiz models
+
+components:
+  - name: QuizHeader
+    path: src/components/QuizHeader.tsx
+    type: Client Component
+    props:
+      - title: string
+      - onBack?: () => void
+    features:
+      - Quiz title display
+      - Dark/light theme toggle
+      - Back button to home
+
+  - name: ProgressBar
+    path: src/components/ProgressBar.tsx
+    type: Client Component
+    props:
+      - current: number (question index)
+      - total: number (total questions)
+    features:
+      - Visual progress bar
+      - Current/total text display
+      - Animated transitions
+
+  - name: QuizCard
+    path: src/components/QuizCard.tsx
+    type: Client Component
+    props:
+      - question: ParsedQuestion
+      - onAnswer: (option, isCorrect) => void
+      - onFlag: (isFlagged) => void
+      - isFlagged?: boolean
+      - disabled?: boolean
+    features:
+      - Term and question display
+      - 4 multiple choice options
+      - Instant feedback (green/red)
+      - Flag button
+      - Disabled state management
+
+  - name: QuizSummary
+    path: src/components/QuizSummary.tsx
+    type: Client Component
+    props:
+      - totalQuestions: number
+      - correctCount: number
+      - accuracy: number
+      - flaggedCount: number
+    features:
+      - Score display
+      - Accuracy with color coding
+      - Flagged count
+      - Retake button
+      - Home button
+
+  - name: QuizFooter
+    path: src/components/QuizFooter.tsx
+    type: Client Component
+    features:
+      - Copyright text
+      - Dark mode support
+
+utilities:
+  - name: quiz-parser.ts
+    path: src/lib/quiz-parser.ts
+    type: CSV Parsing Utility
+    exports:
+      - ParsedQuestion interface
+      - parseQuizCSV(filename: string) function
+    features:
+      - CSV parsing with quote/comma handling
+      - Multi-line field support
+      - Option extraction
+      - Correct answer detection
+
+  - name: quiz-actions.ts
+    path: src/lib/quiz-actions.ts
+    type: Server Actions
+    exports:
+      - initializeQuizSession(quizName)
+      - getQuizSession(sessionId)
+      - saveAnswer(sessionId, questionIndex, selectedOption, isCorrect)
+      - toggleFlag(sessionId, questionIndex, isFlagged)
+      - getQuizQuestions(quizName)
+      - completeQuizSession(sessionId)
+    features:
+      - Prisma database operations
+      - Error handling with fallback
+      - Offline mode support
+
+routes:
+  - path: /joy-quiz
+    component: src/app/joy-quiz/page.tsx
+    layout: src/app/joy-quiz/layout.tsx
+    type: Quiz Learning Module
+    features:
+      - Full quiz interface
+      - State management
+      - Session tracking
+      - Auto-advance timer
+      - Progress persistence
+
+database_schema:
+  models:
+    - name: QuizSession
+      fields:
+        - id: String (primary key)
+        - quizName: String
+        - currentIndex: Int
+        - totalQuestions: Int
+        - correctCount: Int
+        - createdAt: DateTime
+        - updatedAt: DateTime
+      relations:
+        - userAnswers: UserAnswer[]
+        - flaggedItems: FlaggedQuiz[]
+
+    - name: UserAnswer
+      fields:
+        - id: String (primary key)
+        - sessionId: String (foreign key)
+        - questionIndex: Int
+        - selectedOption: String
+        - isCorrect: Boolean
+        - createdAt: DateTime
+      unique_constraints:
+        - [sessionId, questionIndex]
+
+    - name: FlaggedQuiz
+      fields:
+        - id: String (primary key)
+        - sessionId: String (foreign key)
+        - questionIndex: Int
+        - isFlagged: Boolean
+        - createdAt: DateTime
+        - updatedAt: DateTime
+      unique_constraints:
+        - [sessionId, questionIndex]
+
+data_format: |
+  CSV Format:
+  - Fields: Term, Definition
+  - Each row contains a question
+  - Definition includes:
+    - Question text with format: "Q1 - Question?"
+    - 4 options with format: "A) Option", "B) Option", etc.
+    - Correct answer marker: "✓ Correct: A) Option text"
+  - Example:
+    Term,Definition
+    "Your Term","(Multiple Choice)
+    Q1 - Your Question?
+    
+    A) Option A
+    B) Option B
+    C) Option C
+    D) Option D
+    
+    ✓ Correct: A) Option A"
+
+usage: |
+  1. Navigate to /joy-quiz route
+  2. Quiz initializes with CSV data
+  3. Answer each question
+  4. Receive instant feedback (green for correct, red for incorrect)
+  5. Auto-advance after 3 seconds
+  6. Flag questions for later review
+  7. View summary after completing all questions
+  8. Option to retake or return home
+
+customization_points:
+  - Quiz file: Change quizName in src/app/joy-quiz/page.tsx
+  - Auto-advance delay: Modify timeout in src/app/joy-quiz/page.tsx (line with 3000)
+  - Quiz title: Update QuizHeader title prop in src/app/joy-quiz/layout.tsx
+  - Styling: Edit Tailwind classes in component files
+  - Theme colors: Modify dark: classes for dark mode
+
+environment_setup: |
+  1. Ensure CSV file exists:
+     generated/media/quizlet/quiz1_algorithms_multiple_choice.csv
+  
+  2. Optional - Enable database persistence:
+     pnpm exec prisma migrate dev --name add_quiz_tables
+  
+  3. Start development server:
+     pnpm dev
+  
+  4. Access quiz:
+     http://localhost:3000/joy-quiz
+
+testing_checklist:
+  - Quiz loads without errors
+  - CSV questions display correctly
+  - All 4 options are selectable
+  - Correct answer shows green feedback with ✅
+  - Incorrect answer shows red feedback with ❌
+  - Auto-advance works (3 seconds)
+  - Progress bar updates correctly
+  - Flagging functionality works
+  - Summary displays accurate score
+  - Retake button creates new session
+  - Back button returns to home
+  - Dark mode toggle works
+  - Mobile responsive view works
+
+performance_notes: |
+  - Initial Load: CSV parsed once, cached in React state
+  - Question Navigation: O(1) lookup time
+  - Database Writes: Async, non-blocking
+  - Memory: Minimal - only current question in DOM
+  - Works offline: Yes, with browser memory fallback
+
+browser_support: |
+  - Chrome 120+
+  - Firefox 121+
+  - Safari 17+
+  - Edge 120+
+  - Modern browsers with ES2020+ support
+
+future_enhancements:
+  - Statistics dashboard for tracking performance
+  - Spaced repetition algorithm
+  - Question filtering by category/difficulty
+  - Leaderboard system
+  - Timed quiz mode
+  - Export results as PDF
+  - Admin interface for quiz management
+  - Multi-language support
+
+known_limitations: |
+  - Database persistence is optional (works without it)
+  - Single quiz file at a time (can be changed in code)
+  - No user authentication (can be integrated)
+  - No analytics/reporting (can be added)
+  - No question randomization (can be added)
+
+troubleshooting: |
+  Problem: Quiz doesn't load
+  Solution: Verify CSV file exists at generated/media/quizlet/quiz1_algorithms_multiple_choice.csv
+  
+  Problem: Database not persisting
+  Solution: Database persistence is optional - quiz works offline. Run prisma migrate to enable.
+  
+  Problem: Styling looks wrong
+  Solution: Clear Next.js cache (rm -rf .next) and rebuild (pnpm dev)
+  
+  Problem: Auto-advance not working
+  Solution: Check browser console for errors, verify JavaScript is enabled
+
+integration_notes: |
+  - Integrates with existing ThemeSelector component
+  - Uses Tailwind CSS (already configured)
+  - Compatible with existing Prisma setup
+  - Works with existing page layouts
+  - No breaking changes to other features
+
+related_features: |
+  - ThemeProvider: Dark/light mode context
+  - ThemeSelector: Theme toggle component
+  - Prisma: Database ORM and migrations
+  - React Query: Can be integrated for data fetching
+  - TanStack Query: Already available in project
+
+learning_outcomes: |
+  Users can:
+  - Learn algorithms through interactive quizzes
+  - Self-assess knowledge with instant feedback
+  - Identify weak areas by flagging difficult questions
+  - Track progress through completion
+  - Review answers after quiz
+  - Retry quiz to improve scores
+
+files_count: 12
+components_count: 5
+utilities_count: 4
+routes_count: 1
+database_models_count: 3
