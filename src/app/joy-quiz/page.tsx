@@ -225,6 +225,7 @@ export default function QuizPage() {
 
         <div className="flex-1 overflow-y-auto">
           <QuizCard
+            key={currentQuestion.questionIndex}
             question={currentQuestion}
             onAnswer={handleAnswer}
             onFlag={handleFlag}
