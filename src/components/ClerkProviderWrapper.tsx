@@ -6,21 +6,13 @@ import { ReactNode } from 'react';
 /**
  * ClerkProviderWrapper
  * Wraps ClerkProvider as a client component to prevent issues during SSR/build
+ * This allows Clerk initialization to happen only in the browser
  *
- * Behavior:
- * - Production: Full Clerk initialization with API validation
- * - CI Build: Skips ClerkProvider to avoid API key validation errors
- * - Development: Full Clerk initialization
+ * IMPORTANT: This component always renders ClerkProvider because:
+ * - Client-side Clerk components and hooks require it
+ * - Auth-requiring pages are marked as dynamic (not pre-rendered)
+ * - SKIP_ENV_VALIDATION env var prevents API validation in CI
  */
 export function ClerkProviderWrapper({ children }: { children: ReactNode }) {
-  // Detect CI environment to skip Clerk validation during builds
-  const isCIBuild = process.env.CI === 'true' || process.env.NEXT_PUBLIC_CI === 'true';
-
-  // During CI builds, render children without ClerkProvider to prevent API validation errors
-  if (isCIBuild) {
-    return <>{children}</>;
-  }
-
-  // In production/dev, useful ClerkProvider
   return <ClerkProvider>{children}</ClerkProvider>;
 }
