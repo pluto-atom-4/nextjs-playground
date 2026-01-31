@@ -25,11 +25,13 @@ The Review Agent Skill provides automated quality assurance for agent skills usi
 
 ### Using the Review Agent
 
-1. Prepare your skill with `skill.yaml` and `README.md`
+1. Prepare your skill with `SKILL.md` file (Markdown with YAML frontmatter)
 2. Request validation: "Review my skill using the review-agent-skill checklist"
 3. Review the validation report with findings and recommendations
 4. Address issues by severity
 5. Re-run review to verify fixes
+
+⚠️ **Important**: Skills must use `SKILL.md` format (Markdown), NOT `skill.yaml` (YAML)
 
 ---
 
@@ -39,7 +41,7 @@ The Review Agent validates 18 categories:
 
 ### Core Categories
 
-1. **Documentation** - README, skill.yaml, architecture, components, setup
+1. **Documentation** - README.md, SKILL.md (Markdown with YAML frontmatter), architecture, components, setup
 2. **Architecture** - Data flow, components, state management, separation of concerns
 3. **TypeScript & Code Quality** - Typing, strict mode, interfaces, imports
 4. **State Management** - Approach, organization, persistence, fallbacks
@@ -94,7 +96,7 @@ Skill Files → Parse → Apply Checklist → Categorize → Generate Report
 
 ### Process Steps
 
-1. **Preparation** - Prepare skill.yaml and README.md with clear descriptions
+1. **Preparation** - Prepare SKILL.md file (Markdown with YAML frontmatter) with clear descriptions
 2. **Request Review** - Ask agent to validate using this skill
 3. **Receive Report** - Get detailed findings with recommendations
 4. **Address Issues** - Fix critical and high-severity items
@@ -123,14 +125,21 @@ Review is iterative - identify gaps, improve, verify, repeat.
 
 ## Troubleshooting
 
-### Validation fails on well-formed skill
-- Verify YAML syntax is valid
+### Validation fails on well-formed SKILL.md
+- Verify YAML frontmatter syntax (must be between --- delimiters)
+- Check file is named `SKILL.md` (uppercase SKILL, .md extension)
 - Check Markdown heading format
 - Ensure UTF-8 file encoding
 - No special characters in section titles
 
+### Validation detects skill.yaml format
+- ⚠️ **ERROR**: Skills must use `SKILL.md` (Markdown), not `skill.yaml` (YAML)
+- Rename file from `skill.yaml` to `SKILL.md`
+- Convert YAML structure to Markdown with YAML frontmatter
+- Move metadata to frontmatter, instructions to markdown body
+
 ### Report incomplete
-- Verify README.md and skill.yaml exist
+- Verify SKILL.md and README.md exist (SKILL.md required, README.md optional)
 - Check files have all required sections
 - Ensure files are complete and readable
 - Verify file permissions
@@ -168,14 +177,22 @@ This skill validates universal standards. For domain-specific validation, create
 
 ```
 .claude/skills/review-agent-skill/
-├── skill.yaml                    # Skill manifest
-└── README.md                     # Documentation
+├── SKILL.md                      # Skill manifest (Markdown with YAML frontmatter)
+└── README.md                     # Documentation (this file)
 
 Your skill being reviewed:
 .claude/skills/your-skill-name/
-├── skill.yaml                    # File being validated
-└── README.md                     # File being validated
+├── SKILL.md                      # File being validated (Markdown format, REQUIRED)
+└── README.md                     # File being validated (optional reference doc)
 ```
+
+### File Format Requirements
+- **SKILL.md**: Complete skill documentation (Markdown with YAML frontmatter)
+  - YAML frontmatter: name, description, optional license
+  - Markdown body: Instructions and documentation
+  - ⚠️ **MUST be named SKILL.md** (uppercase, .md extension)
+- **README.md**: Quick reference guide (optional but recommended)
+- ❌ **DO NOT use skill.yaml** - Skills use Markdown (SKILL.md), not YAML
 
 ---
 
@@ -231,8 +248,8 @@ description: Does something
 - `.claude/skills/feature-joy-quiz/` - Well-formed example
 
 ### Documentation
-- Check README for skill for additional context
-- Review skill.yaml for detailed criteria
+- README.md documentation (quick reference guide)
+- Review SKILL.md for detailed criteria
 - See troubleshooting section for common issues
 
 ---
@@ -254,8 +271,8 @@ Not applicable (server-side validation). Reports can be viewed in any browser.
 
 ## Dependencies
 
-- YAML parsing capability (for skill.yaml)
-- Markdown parsing capability (for README.md)
+- Markdown parsing capability (for SKILL.md)
+- YAML frontmatter parsing capability (for SKILL.md metadata)
 - No external tools required
 
 ---

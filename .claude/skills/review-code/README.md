@@ -249,10 +249,17 @@ jobs:
 
 ```
 .claude/skills/review-code/
-├── skill.yaml       # Agent skill manifest and configuration
-├── README.md        # This file (quick start & reference)
-└── skill-base.md    # Detailed technical documentation
+├── SKILL.md         # Skill manifest (Markdown with YAML frontmatter, REQUIRED)
+└── README.md        # This file (quick reference guide)
 ```
+
+### File Format Requirements
+- **SKILL.md**: Complete skill documentation (Markdown with YAML frontmatter)
+  - YAML frontmatter: name, description, optional license
+  - Markdown body: Instructions and validation details
+  - ⚠️ **MUST be named SKILL.md** (uppercase SKILL, .md extension)
+- **README.md**: Quick reference guide (this file, optional)
+- ❌ **DO NOT use skill.yaml** - Skills use Markdown (SKILL.md), not YAML
 
 ## 🎯 Best Practices
 
@@ -312,7 +319,7 @@ jobs:
 
 ## 📚 Related Documentation
 
-- **[skill.yaml](./skill.yaml)** - Agent skill manifest
+- **[SKILL.md](./SKILL.md)** - Agent skill manifest (Markdown format)
 - **[Logger Guide](../../../generated/docs-copilot/LOGGER_IMPLEMENTATION_GUIDE.md)** - Logger utility documentation
 - **[Lint Fixes](../../../generated/docs-copilot/LINT_FIXES_COMPLETE.md)** - Detailed lint issue patterns
 - **[Biome Config](../../../biome.json)** - Project linter configuration
