@@ -25,7 +25,8 @@
     "e2e:ui": "playwright test --ui",
     "seed": "tsx src/lib/seed.ts",
     "prisma:studio": "prisma studio",
-    "db:verify": "tsx verify-database.ts"
+    "db:verify": "tsx verify-database.ts",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.1",
@@ -57,5 +58,11 @@
   },
   "engines": {
     "pnpm": ">=10.18.2"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "biome lint --write",
+      "tsc --noEmit"
+    ]
   }
 }
