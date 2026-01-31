@@ -1,7 +1,7 @@
 'use client';
 
 import { ClerkProvider } from '@clerk/nextjs';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * ClerkProviderWrapper
