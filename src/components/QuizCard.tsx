@@ -68,7 +68,7 @@ export function QuizCard({
             disabled={disabled || feedback !== null}
             className={`w-full rounded-lg border-2 px-4 py-3 text-left font-medium text-lg transition-all ${
               selectedOption === option.label
-                ? feedback === 'correct'
+                ? option.label === question.correctAnswer
                   ? 'border-green-500 bg-green-50 text-green-900 dark:bg-green-900 dark:text-green-100'
                   : 'border-red-500 bg-red-50 text-red-900 dark:bg-red-900 dark:text-red-100'
                 : 'border-gray-300 bg-white text-gray-900 hover:border-blue-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
