@@ -23,7 +23,7 @@ export function QuizCard({
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  // Clear feedback and selected option when question changes
+  // Clear feedback and selected option when component mounts (new question)
   useEffect(() => {
     setFeedback(null);
     setSelectedOption(null);
