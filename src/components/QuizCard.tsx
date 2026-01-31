@@ -40,7 +40,7 @@ export function QuizCard({
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-white p-8 dark:bg-gray-800">
+    <div className="flex flex-col gap-6 bg-white p-8 transition-colors dark:bg-gray-800">
       {/* Term */}
       <div>
         <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
@@ -87,7 +87,7 @@ export function QuizCard({
 
       {/* Feedback */}
       <div
-        className={`rounded-lg px-4 py-3 text-center font-semibold min-h-11 flex items-center justify-center ${
+        className={`rounded-lg px-4 py-3 text-center font-semibold min-h-11 flex items-center justify-center transition-colors ${
           feedback
             ? feedback === 'correct'
               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
