@@ -66,7 +66,7 @@ export function QuizCard({
             type="button"
             onClick={() => handleOptionClick(option.label)}
             disabled={disabled || feedback !== null}
-            className={`w-full rounded-lg border-2 px-4 py-3 text-left font-medium transition-all ${
+            className={`w-full rounded-lg border-2 px-4 py-3 text-left font-medium text-lg transition-all ${
               selectedOption === option.label
                 ? feedback === 'correct'
                   ? 'border-green-500 bg-green-50 text-green-900 dark:bg-green-900 dark:text-green-100'
