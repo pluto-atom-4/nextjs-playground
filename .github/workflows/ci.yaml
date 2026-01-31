@@ -64,7 +64,7 @@ jobs:
         run: pnpm prisma generate
 
       - name: Type Check & Build
-        run: pnpm transpile:ci
+        run: pnpm transpile
         env:
           CI: "true"
           NEXT_PUBLIC_CI: "true"
