@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import ThemeSelector from '@/components/ThemeSelector';
 
 interface QuizHeaderProps {
   title: string;
@@ -29,7 +28,6 @@ export function QuizHeader({ title, onBack }: QuizHeaderProps) {
             {title}
           </h1>
         </div>
-        <ThemeSelector />
       </div>
     </header>
   );
