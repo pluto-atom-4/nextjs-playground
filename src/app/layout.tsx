@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ClerkProviderWrapper } from "@/components/ClerkProviderWrapper";
 import ThemeSelector from "@/components/ThemeSelector";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProviderWrapper>
       <html lang="en" suppressHydrationWarning>
         <body>
           <ThemeProvider>
@@ -41,6 +42,6 @@ export default function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }

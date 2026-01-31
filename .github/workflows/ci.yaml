@@ -52,6 +52,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-
+
       - name: Generate Prisma client
         run: pnpm prisma generate
 
@@ -61,6 +69,7 @@ jobs:
           DATABASE_URL: "file:./prisma/dev.db"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_build_dummy_key_do_not_use"
           CLERK_SECRET_KEY: "sk_test_build_dummy_key_do_not_use"
+          SKIP_ENV_VALIDATION: "true"
 
   security:
     name: Security Scan
