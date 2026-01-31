@@ -140,7 +140,9 @@ async function completeQuizSession(sessionId: string) {
     });
 
     if (!session) {
-      throw new Error('Quiz session not found');
+      throwServerError('Quiz session not found', new Error('Session not found'), {
+        context: 'COMPLETE_SESSION',
+      });
     }
 
     return {

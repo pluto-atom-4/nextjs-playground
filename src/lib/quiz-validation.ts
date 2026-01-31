@@ -1,7 +1,3 @@
-// Quick validation of quiz parser structure
-// This ensures the components and actions compile correctly
-
-import type { ParsedQuestion } from '@/lib/quiz-parser';
 import { createLogger } from '@/lib/logger';
 
 const logger = createLogger({ prefix: 'QUIZ-VALIDATION' });

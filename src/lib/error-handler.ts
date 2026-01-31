@@ -70,7 +70,7 @@ export function throwServerError(
 
   // Build the full message with context
   const contextPrefix = context ? `[${context}]` : '';
-  const fullMessage = `${messagePrefix} ${contextPrefix}: ${message}`.trim();
+  const fullMessage = `${messagePrefix} [${includeStack}] ${contextPrefix}: ${message}`.trim();
 
   // Log the error with structured logging
   logger.error(fullMessage, error);
