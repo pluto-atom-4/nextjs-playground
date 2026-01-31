@@ -50,12 +50,12 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         { method: 'GET' }
       );
 
-      const response = await GET(request, { params: { id: testPostId } });
-      const data = await response.json();
+      const response = await GET(request, { params: Promise.resolve({ id: testPostId }) });
+      const data = (await response.json()) as { id: string; title: string };
 
       expect(response.status).toBe(200);
-      expect(data).toHaveProperty('id', testPostId);
-      expect(data).toHaveProperty('title', 'Test Post for [id] Route');
+      expect(data.id).toBe(testPostId);
+      expect(data.title).toBe('Test Post for [id] Route');
     });
 
     it('should return 404 when post ID does not exist', async () => {
@@ -66,11 +66,11 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         { method: 'GET' }
       );
 
-      const response = await GET(request, { params: { id: nonExistentId } });
-      const data = await response.json();
+      const response = await GET(request, { params: Promise.resolve({ id: nonExistentId }) });
+      const data = (await response.json()) as { error: string };
 
       expect(response.status).toBe(404);
-      expect(data).toHaveProperty('error', 'Post not found');
+      expect(data.error).toBe('Post not found');
     });
   });
 
@@ -86,12 +86,12 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: testPostId } });
-      const data = await response.json();
+      const response = await PUT(request, { params: Promise.resolve({ id: testPostId }) });
+      const data = (await response.json()) as { id: string; title: string };
 
       expect(response.status).toBe(200);
-      expect(data).toHaveProperty('id', testPostId);
-      expect(data).toHaveProperty('title', 'Updated Title');
+      expect(data.id).toBe(testPostId);
+      expect(data.title).toBe('Updated Title');
     });
 
     it('should return 404 when updating non-existent post', async () => {
@@ -107,11 +107,11 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: nonExistentId } });
-      const data = await response.json();
+      const response = await PUT(request, { params: Promise.resolve({ id: nonExistentId }) });
+      const data = (await response.json()) as { error: string };
 
       expect(response.status).toBe(404);
-      expect(data).toHaveProperty('error', 'Post not found');
+      expect(data.error).toBe('Post not found');
     });
 
     it('should return 400 when no update fields provided', async () => {
@@ -123,11 +123,11 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: testPostId } });
-      const data = await response.json();
+      const response = await PUT(request, { params: Promise.resolve({ id: testPostId }) });
+      const data = (await response.json()) as { error: string };
 
       expect(response.status).toBe(400);
-      expect(data).toHaveProperty('error');
+      expect(data.error).toBeDefined();
     });
   });
 
@@ -138,12 +138,12 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         { method: 'DELETE' }
       );
 
-      const response = await DELETE(request, { params: { id: testPostId } });
-      const data = await response.json();
+      const response = await DELETE(request, { params: Promise.resolve({ id: testPostId }) });
+      const data = (await response.json()) as { message: string; id: string };
 
       expect(response.status).toBe(200);
-      expect(data).toHaveProperty('message', 'Post deleted');
-      expect(data).toHaveProperty('id', testPostId);
+      expect(data.message).toBe('Post deleted');
+      expect(data.id).toBe(testPostId);
 
       const deletedPost = await db.post.findUnique({
         where: { id: testPostId },
@@ -159,11 +159,11 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         { method: 'DELETE' }
       );
 
-      const response = await DELETE(request, { params: { id: nonExistentId } });
-      const data = await response.json();
+      const response = await DELETE(request, { params: Promise.resolve({ id: nonExistentId }) });
+      const data = (await response.json()) as { error: string };
 
       expect(response.status).toBe(404);
-      expect(data).toHaveProperty('error', 'Post not found');
+      expect(data.error).toBe('Post not found');
     });
 
     it('should cascade delete comments when post is deleted', async () => {
@@ -185,7 +185,7 @@ describe('POST /api/data-fetching/posts/[id]', () => {
         { method: 'DELETE' }
       );
 
-      const response = await DELETE(request, { params: { id: testPostId } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: testPostId }) });
       expect(response.status).toBe(200);
 
       const commentsAfter = await db.comment.findMany({

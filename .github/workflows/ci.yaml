@@ -63,9 +63,11 @@ jobs:
       - name: Generate Prisma client
         run: pnpm prisma generate
 
-      - name: Build Next.js
-        run: pnpm build
+      - name: Type Check & Build
+        run: pnpm transpile:ci
         env:
+          CI: "true"
+          NEXT_PUBLIC_CI: "true"
           DATABASE_URL: "file:./prisma/dev.db"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_build_dummy_key_do_not_use"
           CLERK_SECRET_KEY: "sk_test_build_dummy_key_do_not_use"
