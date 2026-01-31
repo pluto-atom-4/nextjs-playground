@@ -1,6 +1,5 @@
 'use client';
 
-import { ReactNode } from 'react';
 import styles from './ErrorFallback.module.css';
 
 /**
@@ -164,47 +163,48 @@ export default function ErrorFallback({
           </p>
           <ul className={styles.suggestionsList}>
             {suggestions.map((suggestion, index) => {
+              const key = `suggestion-${index}-${typeof suggestion === 'string' ? suggestion.substring(0, 10) : suggestion.label}`;
               if (typeof suggestion === 'string') {
                 return (
                   <li
-                    key={index}
+                    key={key}
                     className={styles.suggestionItem}
                   >
                     <span className={styles.suggestionBullet}>•</span>
                     {suggestion}
                   </li>
                 );
-              } else {
-                return (
-                  <li
-                    key={index}
-                    className={styles.suggestionItem}
-                  >
-                    <span className={styles.suggestionBullet}>•</span>
-                    <a
-                      href={suggestion.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.suggestionLink}
-                    >
-                      {suggestion.label}
-                      <svg
-                        className={styles.linkIcon}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                    </a>
-                  </li>
-                );
               }
+              return (
+                <li
+                  key={key}
+                  className={styles.suggestionItem}
+                >
+                  <span className={styles.suggestionBullet}>•</span>
+                  <a
+                    href={suggestion.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.suggestionLink}
+                  >
+                    {suggestion.label}
+                    <svg
+                      className={styles.linkIcon}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <title>External link icon</title>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                </li>
+              );
             })}
           </ul>
         </div>
@@ -214,6 +214,7 @@ export default function ErrorFallback({
       <div className={styles.actions}>
         {onReset && (
           <button
+            type="button"
             onClick={onReset}
             className={styles.resetButton}
           >

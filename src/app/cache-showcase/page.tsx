@@ -55,8 +55,9 @@ export default function CacheShowcase() {
         {/* Examples Grid */}
         <div className={styles.examplesGrid}>
           {examples.map((example) => (
-            <div
+            <button
               key={example.id}
+              type="button"
               onClick={() => setSelectedExample(example.id)}
               className={styles.exampleCard}
             >
@@ -70,7 +71,7 @@ export default function CacheShowcase() {
               >
                 Explore →
               </Link>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -82,6 +83,7 @@ export default function CacheShowcase() {
                 {examples.find((e) => e.id === selectedExample)?.title}
               </h3>
               <button
+                type="button"
                 onClick={() => setSelectedExample(null)}
                 className={styles.closeButton}
               >

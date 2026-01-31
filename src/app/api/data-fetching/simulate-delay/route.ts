@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/data-fetching/simulate-delay
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
     // Parse delay with default of 1000ms
     let delay = 1000;
     if (delayParam) {
-      delay = parseInt(delayParam);
+      delay = Number.parseInt(delayParam);
 
       // Validate delay parameter
-      if (isNaN(delay) || delay < 0) {
+      if (Number.isNaN(delay) || delay < 0) {
         return NextResponse.json(
           { error: 'Invalid delay parameter. Must be a non-negative number.' },
           { status: 400 }

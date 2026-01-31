@@ -119,7 +119,7 @@ nextjs-playground/
 │   └── lib/                          # Utilities and helpers
 │       ├── react-query.ts            # TanStack React Query setup
 │       └── schema.ts                 # Zod validation schemas
-├── eslint.config.mjs                 # ESLint configuration
+├── biome.json                        # Biome configuration
 ├── next.config.ts                    # Next.js configuration
 ├── postcss.config.mjs                # PostCSS/Tailwind setup
 ├── tsconfig.json                     # TypeScript configuration
@@ -148,7 +148,7 @@ nextjs-playground/
 - **Zod:** 4.1.13 (TypeScript-first schema validation)
 
 ### Dev Tools
-- **ESLint:** 9.39.1 (with Next.js config)
+- **Biome:** 1.9.4 (Linter & formatter)
 - **Node Types:** 20.19.26
 - **React Types:** 19.2.7
 
@@ -203,10 +203,7 @@ nextjs-playground/
 pnpm lint
 ```
 
-Fix linting issues with ESLint (if auto-fix available):
-```bash
-pnpm lint -- --fix
-```
+Biome automatically checks and fixes code formatting and linting issues.
 
 ---
 
@@ -293,7 +290,7 @@ This approach keeps generated artifacts organized and separate from source code 
 - 🔧 TypeScript is **strict mode** enabled (`strict: true` in tsconfig.json).
 - 📦 Path aliases starting with `@/` map to the `src/` directory.
 - 🎨 Tailwind CSS 4.x is configured with PostCSS.
-- 🔄 ESLint is configured with Next.js-specific rules.
+- 🔄 Biome is configured for linting and code formatting.
 - ✅ React Query is pre-configured for data fetching patterns.
 - 🔐 Zod is available for runtime schema validation.
 
@@ -304,7 +301,7 @@ This approach keeps generated artifacts organized and separate from source code 
 ### Code Style
 - ✅ Use functional components with hooks (React 19)
 - ✅ Use TypeScript for all files (.ts, .tsx)
-- ✅ Follow ESLint rules automatically
+- ✅ Follow Biome linting rules automatically
 - ✅ Use CSS modules for component-scoped styles
 - ✅ Implement error boundaries for better error handling
 

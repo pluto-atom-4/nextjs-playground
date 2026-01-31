@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createLogger } from './lib/logger';
 
 /**
  * Client-side instrumentation for analytics and monitoring
@@ -6,6 +7,8 @@ import { useEffect } from 'react';
  *
  * Reference: https://nextjs.org/docs/app/guides/analytics
  */
+
+const logger = createLogger({ prefix: 'VITALS', timestamp: true });
 
 export function register() {
   if (typeof window === 'undefined') {
@@ -18,28 +21,28 @@ export function register() {
 
     // Track Core Web Vitals
     vitals.onCLS((metric: any) => {
-      console.log('CLS:', metric);
+      logger.debug('CLS metric', metric);
       // Send to your analytics service
       // Example: analytics.track('CLS', { value: metric.value });
     });
 
     vitals.onFID((metric: any) => {
-      console.log('FID:', metric);
+      logger.debug('FID metric', metric);
       // Send to your analytics service
     });
 
     vitals.onFCP((metric: any) => {
-      console.log('FCP:', metric);
+      logger.debug('FCP metric', metric);
       // Send to your analytics service
     });
 
     vitals.onLCP((metric: any) => {
-      console.log('LCP:', metric);
+      logger.debug('LCP metric', metric);
       // Send to your analytics service
     });
 
     vitals.onTTFB((metric: any) => {
-      console.log('TTFB:', metric);
+      logger.debug('TTFB metric', metric);
       // Send to your analytics service
     });
   }
@@ -48,7 +51,7 @@ export function register() {
   // Uncomment and customize for your analytics provider
   /*
   const handleRouteChange = (url: string) => {
-    console.log('Route changed to:', url);
+    logger.debug('Route changed', { url });
     // Send page view to your analytics service
     // analytics.pageview(url);
   };
@@ -63,9 +66,9 @@ export function register() {
   /*
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      console.log('Page hidden');
+      logger.info('Page hidden');
     } else {
-      console.log('Page visible');
+      logger.info('Page visible');
     }
   });
   */
@@ -75,10 +78,10 @@ export function register() {
  * Optional: Hook for tracking analytics in components
  * Usage: useAnalytics('event-name', { custom: 'data' })
  */
-export function useAnalytics(eventName: string, data?: Record<string, any>) {
+export function useAnalytics(eventName: string, data?: Record<string, unknown>) {
   useEffect(() => {
-    // Send analytics event
-    console.log(`Analytics Event: ${eventName}`, data);
+    // Log analytics event
+    logger.debug(`Analytics Event: ${eventName}`, data);
 
     // Example integration with analytics service:
     // analytics.track(eventName, data);

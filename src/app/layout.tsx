@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ClerkProviderWrapper } from "@/components/ClerkProviderWrapper";
 import ThemeSelector from "@/components/ThemeSelector";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProviderWrapper>
       <html lang="en" suppressHydrationWarning>
         <body>
           <ThemeProvider>
@@ -26,7 +27,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-4">
                   <SignedOut>
                     <SignInButton mode="modal">
-                      <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                      <button type="button" className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
                         Sign In
                       </button>
                     </SignInButton>
@@ -41,6 +42,6 @@ export default function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }

@@ -14,7 +14,7 @@
  *   const comments = createCommentsBatch(3, { postId: posts[0].id });
  */
 
-import { User, Post, Comment } from '@/generated/prisma/client';
+import type { User, Post, Comment } from '@/generated/prisma/client';
 
 // ============================================================================
 // Utilities
@@ -27,7 +27,7 @@ import { User, Post, Comment } from '@/generated/prisma/client';
  * @returns Generated ID string with 'c' prefix and 10 random characters
  */
 function generateId(): string {
-  return 'c' + Math.random().toString(36).substring(2, 11);
+  return `c${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
@@ -36,7 +36,7 @@ function generateId(): string {
  * @param secondsOffset - Number of seconds to offset (negative for past, positive for future). Default: 0
  * @returns Date object with the offset applied
  */
-function getTimestamp(secondsOffset: number = 0): Date {
+function getTimestamp(secondsOffset = 0): Date {
   const date = new Date();
   date.setSeconds(date.getSeconds() + secondsOffset);
   return date;
@@ -133,9 +133,7 @@ export function createPost(overrides: CreatePostInput = {}): Post {
     id,
     title: overrides.title ?? `Post Title ${index}`,
     content: overrides.content ??
-      `This is a sample post content. ${index}\n\n` +
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-      'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      `This is a sample post content. ${index}\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
     authorId: overrides.authorId ?? generateId(),
     createdAt: overrides.createdAt ?? getTimestamp(-7200),
     updatedAt: overrides.updatedAt ?? getTimestamp(-3600),

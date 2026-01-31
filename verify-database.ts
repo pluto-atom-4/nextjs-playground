@@ -4,29 +4,35 @@
  * Usage: pnpm exec tsx verify-database.ts
  */
 
-import { db } from './src/lib/db';
+import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ prefix: 'DB-VERIFY' });
 
 async function verifyDatabaseConnectivity() {
-  console.log('\n📊 Database Connectivity Verification\n');
-  console.log('=' .repeat(60));
+  logger.line();
+  logger.info('📊 Database Connectivity Verification');
+  logger.separator();
 
   try {
     // Step 1: Check connection
-    console.log('\n✓ Step 1: Checking database connection...');
+    logger.info('Step 1: Checking database connection...');
     const users = await db.user.count();
-    console.log(`  ✓ Database connection successful`);
-    console.log(`  ✓ Found ${users} user(s)\n`);
+    logger.success('Database connection successful');
+    logger.info(`Found ${users} user(s)`);
+    logger.line();
 
     // Step 2: Verify schema
-    console.log('✓ Step 2: Verifying schema models...');
+    logger.info('Step 2: Verifying schema models...');
     const posts = await db.post.count();
     const comments = await db.comment.count();
-    console.log(`  ✓ User model: working (${users} records)`);
-    console.log(`  ✓ Post model: working (${posts} records)`);
-    console.log(`  ✓ Comment model: working (${comments} records)\n`);
+    logger.success(`User model: working (${users} records)`);
+    logger.success(`Post model: working (${posts} records)`);
+    logger.success(`Comment model: working (${comments} records)`);
+    logger.line();
 
     // Step 3: Test query with relations
-    console.log('✓ Step 3: Testing query with relations...');
+    logger.info('Step 3: Testing query with relations...');
     const userWithRelations = await db.user.findFirst({
       include: {
         posts: true,
@@ -35,35 +41,40 @@ async function verifyDatabaseConnectivity() {
     });
 
     if (userWithRelations) {
-      console.log(`  ✓ Relations working correctly`);
-      console.log(`  ✓ Sample user: ${userWithRelations.name}`);
-      console.log(`    - Posts: ${userWithRelations.posts.length}`);
-      console.log(`    - Comments: ${userWithRelations.comments.length}\n`);
+      logger.success('Relations working correctly');
+      logger.success(`Sample user: ${userWithRelations.name}`);
+      logger.info(`  - Posts: ${userWithRelations.posts.length}`);
+      logger.info(`  - Comments: ${userWithRelations.comments.length}`);
     } else {
-      console.log(`  ✓ No users found (database is empty)\n`);
+      logger.success('No users found (database is empty)');
     }
+    logger.line();
 
     // Step 4: Check database file (SQLite)
-    console.log('✓ Step 4: Database file information...');
+    logger.info('Step 4: Database file information...');
     const databaseUrl = process.env.DATABASE_URL;
-    console.log(`  ✓ DATABASE_URL: ${databaseUrl}`);
-    console.log(`  ✓ Database provider: SQLite\n`);
+    logger.success(`DATABASE_URL: ${databaseUrl}`);
+    logger.success('Database provider: SQLite');
+    logger.line();
 
     // Step 5: Summary
-    console.log('=' .repeat(60));
-    console.log('\n✅ DATABASE CONNECTIVITY VERIFIED SUCCESSFULLY!\n');
-    console.log('Next steps:');
-    console.log('1. View database UI: pnpm exec prisma studio');
-    console.log('2. Open browser: http://localhost:5555');
-    console.log('3. Browse tables and records\n');
-
+    logger.separator();
+    logger.success('DATABASE CONNECTIVITY VERIFIED SUCCESSFULLY!');
+    logger.line();
+    logger.info('Next steps:');
+    logger.info('1. View database UI: pnpm exec prisma studio');
+    logger.info('2. Open browser: http://localhost:5555');
+    logger.info('3. Browse tables and records');
+    logger.line();
   } catch (error) {
-    console.error('\n❌ Database Connectivity Error:');
-    console.error(error instanceof Error ? error.message : String(error));
-    console.error('\nTroubleshooting:');
-    console.error('1. Check .env.local exists and DATABASE_URL is set');
-    console.error('2. Run migrations: pnpm exec prisma migrate dev');
-    console.error('3. Check database file permissions');
+    logger.line();
+    logger.error('Database Connectivity Error', error);
+    logger.line();
+    logger.warn('Troubleshooting:');
+    logger.warn('1. Check .env.local exists and DATABASE_URL is set');
+    logger.warn('2. Run migrations: pnpm exec prisma migrate dev');
+    logger.warn('3. Check database file permissions');
+    logger.line();
     process.exit(1);
   }
 }

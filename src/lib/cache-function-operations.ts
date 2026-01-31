@@ -1,5 +1,9 @@
 // Function-level cache utilities with 'use cache'
 
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger({ prefix: 'FUNCTION-CACHE' });
+
 interface FunctionCacheStats {
   functionName: string;
   hits: number;
@@ -41,7 +45,7 @@ export function getFunctionStats() {
 
 // Function 1: Heavy computation with 'use cache'
 export async function calculateFibonacci(n: number) {
-  console.log(`[FUNCTION-CACHE] Computing Fibonacci(${n})...`);
+  logger.debug(`Computing Fibonacci(${n})...`);
 
   const startTime = performance.now();
 
@@ -69,7 +73,7 @@ export async function calculateFibonacci(n: number) {
 
 // Function 2: API simulation with cache
 export async function fetchWeatherData(city: string) {
-  console.log(`[FUNCTION-CACHE] Fetching weather for ${city}...`);
+  logger.debug(`Fetching weather for ${city}...`);
 
   const startTime = performance.now();
 
@@ -93,7 +97,7 @@ export async function fetchWeatherData(city: string) {
 
 // Function 3: Data transformation with cache
 export async function processUserData(userId: string) {
-  console.log(`[FUNCTION-CACHE] Processing data for user ${userId}...`);
+  logger.debug(`Processing data for user ${userId}...`);
 
   const startTime = performance.now();
 

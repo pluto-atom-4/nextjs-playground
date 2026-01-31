@@ -11,6 +11,7 @@ export default function TabContainer() {
     <div className="max-w-2xl mx-auto mt-10">
       <div className="flex flex-wrap space-x-2 mb-4 gap-2">
         <button
+          type="button"
           onClick={() => setActiveTab('contact')}
           className={`px-4 py-2 rounded ${
             activeTab === 'contact' ? 'bg-blue-500 text-white' : 'bg-gray-200'
@@ -19,6 +20,7 @@ export default function TabContainer() {
           Contact
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('about')}
           className={`px-4 py-2 rounded ${
             activeTab === 'about' ? 'bg-blue-500 text-white' : 'bg-gray-200'

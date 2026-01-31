@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
 /**
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q')?.trim();
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')));
+    const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit') || '20')));
 
     // Validate search query
     if (!query) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate limit
-    if (isNaN(limit)) {
+    if (Number.isNaN(limit)) {
       return NextResponse.json(
         { error: 'Invalid limit parameter' },
         { status: 400 }
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
     const posts = await db.post.findMany({
       where: {
         OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } },
+          { title: { contains: query } },
+          { content: { contains: query } },
         ],
       },
       take: limit,

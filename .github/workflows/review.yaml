@@ -1,0 +1,76 @@
+name: Review
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  code-review:
+    name: Code Quality Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Run unit tests
+        run: pnpm test
+        continue-on-error: true
+        env:
+          DATABASE_URL: "file:./prisma/dev.db"
+
+      - name: Generate coverage report
+        run: pnpm test:coverage
+        continue-on-error: true
+        env:
+          DATABASE_URL: "file:./prisma/dev.db"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for known vulnerabilities
+        run: pnpm audit --prod
+        continue-on-error: true

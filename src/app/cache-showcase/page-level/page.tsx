@@ -1,14 +1,17 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { createLogger } from '@/lib/logger';
 import styles from './page-level.module.css';
+
+const logger = createLogger({ prefix: 'PAGE-CACHE' });
 
 // Page-level cache configuration using Next.js revalidation
 export const revalidate = 60; // Revalidate every 60 seconds
 
 // Simulate page-specific data fetching with cache
 async function getPageData() {
-  console.log('[PAGE-CACHE] Fetching page data...');
+  logger.info('Fetching page data...');
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800));
