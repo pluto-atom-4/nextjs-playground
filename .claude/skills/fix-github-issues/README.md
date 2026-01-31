@@ -310,17 +310,26 @@ git commit -m "WIP: save changes"
 
 ```
 .claude/skills/fix-github-issues/
-├── skill.yaml              # Skill manifest with all configuration
+├── SKILL.md                # Skill manifest (Markdown with YAML frontmatter)
 ├── README.md               # This file - quick start guide
-└── workflow-reference.md   # Detailed workflow documentation
+└── workflow-reference.md   # Detailed workflow documentation (optional)
 ```
+
+### File Format
+- **SKILL.md**: Markdown file with YAML frontmatter (name, description, license)
+  - Contains complete skill documentation
+  - YAML frontmatter defines metadata
+  - Markdown body contains instructions
+- **README.md**: Quick reference guide (this file)
+- ⚠️ **Note**: Skills use `SKILL.md` format (Markdown), NOT `skill.yaml` (YAML)
 
 ## 🔗 Related Documentation
 
-- **[skill.yaml](./skill.yaml)** - Complete skill configuration and reference
+- **[SKILL.md](./SKILL.md)** - Complete skill configuration (Markdown format with YAML frontmatter)
 - **[GitHub CLI Docs](https://cli.github.com/)** - GitHub command-line tool
 - **[Git Documentation](https://git-scm.com/doc)** - Version control reference
 - **[nextjs-playground Copilot Instructions](./../../../.github/copilot-instructions.md)** - Project guidelines
+- **[Agent Skills Standard](https://github.com/agentskills/agentskills)** - Skills format specification
 
 ## 🏆 Features
 

@@ -511,33 +511,40 @@ D) Option D
 ## 📁 File Structure
 
 ```
-.claude/skills/feature-joy-quiz/          ← You are here
-├── skill.yaml                            ← Skill manifest
-└── README.md                             ← This file
+.claude/skills/feature-joy-quiz/            ← You are here
+├── SKILL.md                               ← Skill manifest (Markdown with YAML frontmatter)
+└── README.md                              ← This file - quick reference guide
 
 src/app/joy-quiz/
-├── page.tsx                              ← Main quiz page
-└── layout.tsx                            ← Layout wrapper
+├── page.tsx                               ← Main quiz page
+└── layout.tsx                             ← Layout wrapper
 
 src/components/
-├── QuizHeader.tsx                        ← Header component
-├── ProgressBar.tsx                       ← Progress indicator
-├── QuizCard.tsx                          ← Quiz interface
-├── QuizSummary.tsx                       ← Results screen
-└── QuizFooter.tsx                        ← Footer component
+├── QuizHeader.tsx                         ← Header component
+├── ProgressBar.tsx                        ← Progress indicator
+├── QuizCard.tsx                           ← Quiz interface
+├── QuizSummary.tsx                        ← Results screen
+└── QuizFooter.tsx                         ← Footer component
 
 src/lib/
-├── quiz-parser.ts                        ← CSV parsing
-├── quiz-actions.ts                       ← Server actions
-├── quiz-validation.ts                    ← Type validation
-└── migrate-quiz.ts                       ← Migration helper
+├── quiz-parser.ts                         ← CSV parsing
+├── quiz-actions.ts                        ← Server actions
+├── quiz-validation.ts                     ← Type validation
+└── migrate-quiz.ts                        ← Migration helper
 
 generated/media/quizlet/
-└── quiz1_algorithms_multiple_choice.csv  ← Quiz data
+└── quiz1_algorithms_multiple_choice.csv   ← Quiz data
 
 prisma/
-└── schema.prisma                         ← Database schema
+└── schema.prisma                          ← Database schema
 ```
+
+### File Format
+- **SKILL.md**: Complete skill documentation (Markdown with YAML frontmatter)
+  - YAML frontmatter: name, description, license
+  - Markdown body: Instructions and reference
+- **README.md**: Quick start guide (this file)
+- ⚠️ **Note**: Skills use `SKILL.md` format (Markdown), NOT `skill.yaml` (YAML)
 
 ---
 
@@ -639,7 +646,7 @@ Potential additions to the feature:
 ### Getting Help
 
 1. **Check Troubleshooting:** See [Troubleshooting](#-troubleshooting) section
-2. **Review Documentation:** Check skill.yaml for detailed reference
+2. **Review Documentation:** Check SKILL.md for detailed reference
 3. **Check Browser Console:** F12 → Console tab for errors
 4. **Verify Setup:** Ensure all files exist and permissions are correct
 
