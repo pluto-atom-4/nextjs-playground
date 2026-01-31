@@ -47,3 +47,43 @@ model Comment {
 
   @@map("comments")
 }
+
+model QuizSession {
+  id            String        @id @default(cuid())
+  quizName      String
+  currentIndex  Int           @default(0)
+  totalQuestions Int
+  correctCount  Int           @default(0)
+  userAnswers   UserAnswer[]
+  flaggedItems  FlaggedQuiz[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("quiz_sessions")
+}
+
+model UserAnswer {
+  id              String       @id @default(cuid())
+  session         QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId       String
+  questionIndex   Int
+  selectedOption  String
+  isCorrect       Boolean
+  createdAt       DateTime     @default(now())
+
+  @@unique([sessionId, questionIndex])
+  @@map("user_answers")
+}
+
+model FlaggedQuiz {
+  id            String       @id @default(cuid())
+  session       QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId     String
+  questionIndex Int
+  isFlagged     Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([sessionId, questionIndex])
+  @@map("flagged_quizzes")
+}

@@ -371,39 +371,39 @@ If successful, you'll see the PostgreSQL version.
 Open `prisma/schema.prisma` and replace the content with:
 
 ```prisma
-// Prisma schema file - Learn more at https://pris.ly/d/prisma-schema
-// Prisma 7: Enhanced type inference and performance
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String
   posts     Post[]
   comments  Comment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("users")
 }
 
 model Post {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   content   String
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User      @relation(fields: [authorId], references: [id])
   authorId  String
   comments  Comment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("posts")
 }
@@ -416,17 +416,59 @@ model Comment {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime  @updatedAt
 
   @@map("comments")
+}
+
+model QuizSession {
+  id            String        @id @default(cuid())
+  quizName      String
+  currentIndex  Int           @default(0)
+  totalQuestions Int
+  correctCount  Int           @default(0)
+  userAnswers   UserAnswer[]
+  flaggedItems  FlaggedQuiz[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("quiz_sessions")
+}
+
+model UserAnswer {
+  id              String       @id @default(cuid())
+  session         QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId       String
+  questionIndex   Int
+  selectedOption  String
+  isCorrect       Boolean
+  createdAt       DateTime     @default(now())
+
+  @@unique([sessionId, questionIndex])
+  @@map("user_answers")
+}
+
+model FlaggedQuiz {
+  id            String       @id @default(cuid())
+  session       QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId     String
+  questionIndex Int
+  isFlagged     Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([sessionId, questionIndex])
+  @@map("flagged_quizzes")
 }
 ```
 
 **Prisma 7 Features Used:**
+- SQLite database for local development (fast, zero-config)
 - Optimized relation handling with auto-populated reference fields
-- Improved `@default` directives with better type inference
-- Enhanced cascade delete support
-- Better datetime handling with timezone awareness
+- Enhanced cascade delete support on related models
+- Better datetime handling with improved timestamp tracking
+- Quiz session models for managing user quiz interactions with flagging support
+- Composite unique constraints for preventing duplicate entries
 
 ### 5.2 Verify Schema Syntax
 
@@ -481,6 +523,210 @@ cat prisma/migrations/*/migration.sql
 ```
 
 This shows the actual SQL that was executed.
+
+### 6.4 Apply Schema Changes and Add New Tables
+
+When you need to add new models (tables) to the database after the initial setup, follow this workflow:
+
+#### 6.4.1 Update the Prisma Schema
+
+Edit `prisma/schema.prisma` and add your new model. For example, adding a `QuizSession` model:
+
+```prisma
+model QuizSession {
+  id            String        @id @default(cuid())
+  quizName      String
+  currentIndex  Int           @default(0)
+  totalQuestions Int
+  correctCount  Int           @default(0)
+  userAnswers   UserAnswer[]
+  flaggedItems  FlaggedQuiz[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("quiz_sessions")
+}
+```
+
+**Prisma Schema Best Practices:**
+- Use meaningful model names (PascalCase)
+- Always include `id`, `createdAt`, and `updatedAt` fields
+- Use `@@map()` to control database table names
+- Define relationships with proper `@relation` directives
+- Use `onDelete: Cascade` for dependent records cleanup
+
+#### 6.4.2 Validate Schema Syntax
+
+Before creating a migration, verify your schema is syntactically correct:
+
+```bash
+pnpm exec prisma validate
+```
+
+**Expected output:**
+```
+✓ Your schema is valid
+```
+
+**If validation fails:**
+- Review error message carefully
+- Check field types, relations, and constraints
+- Verify all referenced fields exist
+- Ensure no circular dependencies in relations
+
+#### 6.4.3 Create a Migration for Schema Changes
+
+Create a new migration with a descriptive name for the changes:
+
+```bash
+pnpm exec prisma migrate dev --name add_quiz_session_tables
+```
+
+**What this does:**
+1. Detects differences between current schema and database
+2. Generates migration SQL automatically
+3. Creates migration folder: `prisma/migrations/[timestamp]_add_quiz_session_tables/`
+4. Executes the migration on your database
+5. Updates `prisma/schema.prisma` if using introspection
+
+**Output:**
+```
+✔ Created migration: prisma/migrations/[timestamp]_add_quiz_session_tables/
+✔ Database migration completed successfully
+✔ Generated Prisma Client (X.Y.Z) in XX.XXs
+```
+
+#### 6.4.4 Review Generated Migration SQL (Important)
+
+Always review the generated migration to ensure it matches your intent:
+
+```bash
+cat prisma/migrations/[timestamp]_add_quiz_session_tables/migration.sql
+```
+
+**Example output:**
+```sql
+-- CreateTable "quiz_sessions"
+CREATE TABLE "quiz_sessions" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "quizName" TEXT NOT NULL,
+    "currentIndex" INTEGER NOT NULL DEFAULT 0,
+    "totalQuestions" INTEGER NOT NULL,
+    "correctCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable "user_answers"
+CREATE TABLE "user_answers" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "sessionId" TEXT NOT NULL,
+    "questionIndex" INTEGER NOT NULL,
+    "selectedOption" TEXT NOT NULL,
+    "isCorrect" BOOLEAN NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "user_answers_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "quiz_sessions" ("id") ON DELETE CASCADE
+);
+```
+
+**Verify:**
+- ✅ Correct table names (check `@@map()` values)
+- ✅ All fields present with correct types
+- ✅ Primary keys and unique constraints defined
+- ✅ Foreign key relationships correct
+- ✅ Default values match schema
+
+#### 6.4.5 Verify Tables in Database
+
+After migration completes, verify the new tables exist:
+
+```bash
+# For SQLite
+pnpm exec prisma db execute --stdin
+# Then run: .tables
+
+# OR use Prisma Studio (easier)
+pnpm exec prisma studio
+```
+
+**Using Prisma Studio:**
+1. Run: `pnpm exec prisma studio`
+2. Open browser to `http://localhost:5555`
+3. Look for new tables in the left sidebar
+4. Verify table structure matches schema
+
+#### 6.4.6 Handle Schema Changes Workflow
+
+**For different types of changes:**
+
+| Change Type | Command | Notes |
+|---|---|---|
+| Add new model | `pnpm exec prisma migrate dev --name add_model_name` | Automatically creates table |
+| Add field to model | `pnpm exec prisma migrate dev --name add_field_to_model` | Handles NOT NULL defaults |
+| Remove model | `pnpm exec prisma migrate dev --name remove_model_name` | Drops table (data loss!) |
+| Rename model | `pnpm exec prisma migrate dev --name rename_model` | Complex – review SQL |
+| Change field type | `pnpm exec prisma migrate dev --name change_field_type` | May require data migration |
+| Add constraint | `pnpm exec prisma migrate dev --name add_constraint` | Validates existing data |
+
+#### 6.4.7 Reset Database If Needed (Development Only)
+
+If you need to start fresh with a new schema:
+
+```bash
+# ⚠️ WARNING: This deletes all data in the database!
+pnpm exec prisma migrate reset
+```
+
+**What it does:**
+1. Drops all tables
+2. Re-runs all migrations from scratch
+3. Re-seeds the database if seed script exists
+
+**Use cases:**
+- Development: Starting fresh after major schema changes
+- Testing: Resetting to known state before test suite
+- Fixing: Recovering from problematic migration
+
+**After reset, re-seed:**
+```bash
+pnpm seed
+```
+
+#### 6.4.8 Troubleshooting Schema Changes
+
+**Issue: "Column already exists"**
+```
+Error: A migration is pending or failed
+```
+**Solution:**
+```bash
+# Check migration status
+pnpm exec prisma migrate status
+
+# If stuck, reset and try again (dev only)
+pnpm exec prisma migrate reset
+```
+
+**Issue: "Cannot add NOT NULL field"**
+```
+Error: Cannot add a NOT NULL column with no default value
+```
+**Solution:** Add `@default()` directive to the field in schema:
+```prisma
+newField String @default("default-value")
+```
+
+**Issue: "Foreign key constraint failed"**
+```
+Error: Foreign key constraint failed
+```
+**Solution:** Ensure referenced records exist or use `onDelete: Cascade` for cleanup.
+
+**Issue: "Unique constraint violation"**
+```
+Error: Unique constraint failed
+```
+**Solution:** Check for duplicate values in data. May need data migration script.
 
 ---
 
