@@ -219,7 +219,7 @@ export default function QuizPage() {
   const isFlaggedCurrent = flagged.has(currentIndex);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-start min-h-screen pt-8">
       <div className="w-240">
         <ProgressBar current={currentIndex} total={questions.length} />
 
