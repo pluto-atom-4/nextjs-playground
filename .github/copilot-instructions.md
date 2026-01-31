@@ -21,6 +21,9 @@
 > - File-specific edits using the proper tools
 > - **⚡ Minimize documentation generation** – Only create docs when explicitly requested
 > - **Generated documents:** Save docs to `./generated/docs-copilot/` (not in workspace root)
+>
+> ### 🖥️ ENVIRONMENT REQUIREMENT
+> **ALL commands must use Git Bash syntax, not PowerShell or CMD.** This project runs on Git Bash for Windows. Use Unix/Linux-style commands and path separators (forward slashes `/` for paths).
 
 ---
 
@@ -29,6 +32,94 @@
 This document outlines the recommended configuration and instructions for using GitHub Copilot with the `nextjs-playground` project. This is a **Next.js 16 + React 19 + TypeScript** web application using **pnpm** as the package manager. The configuration is designed for **Git Bash on Windows** and includes setup instructions, development workflows, and best practices.
 
 > **Note:** This file is a project-local helper for humans and automation. GitHub Copilot editor extensions may or may not automatically read/obey it.
+
+---
+
+## Git Bash Environment
+
+### Why Git Bash?
+This project uses **Git Bash on Windows** to ensure **cross-platform consistency** and avoid PowerShell/CMD incompatibilities. All development commands must use Git Bash syntax.
+
+### Setting Up Git Bash
+1. **Install Git for Windows** with Git Bash support: https://git-scm.com/download/win
+2. **Configure WebStorm** to use Git Bash as the terminal:
+   - Go to **Settings → Tools → Terminal**
+   - Set **Shell path** to: `C:\Program Files\Git\bin\bash.exe`
+   - Apply and restart WebStorm terminal
+3. **Verify Git Bash is active:**
+   ```bash
+   echo $SHELL
+   # Output should show: /bin/bash or similar
+   ```
+
+### Git Bash Command Syntax
+
+| Task | Git Bash | ❌ NOT PowerShell |
+|------|----------|-------------------|
+| List files | `ls -la` | `dir` or `Get-ChildItem` |
+| Print variable | `echo $VAR` | `$Env:VAR` or `echo %VAR%` |
+| Navigate | `cd src/components` | `cd src\components` |
+| Find files | `find . -name "*.tsx"` | `Get-ChildItem -Filter` |
+| Run npm scripts | `pnpm dev` | Same (works in both) |
+| View file | `cat file.txt` | `type file.txt` or `Get-Content` |
+| Remove files | `rm -rf node_modules` | `Remove-Item -Recurse` |
+| Set env var | `export VAR=value` | `$Env:VAR="value"` |
+
+### Common Git Bash Commands
+
+**Directory Operations:**
+```bash
+# List files with details
+ls -la
+
+# Create directories
+mkdir -p src/components/new-component
+
+# Remove files/directories
+rm file.txt
+rm -rf directory-name
+
+# Copy files
+cp source.txt destination.txt
+cp -r src/components/old src/components/new
+```
+
+**File Operations:**
+```bash
+# View file contents
+cat src/app/page.tsx
+
+# Search for text in files
+grep -r "useState" src/components/
+
+# Find files by pattern
+find src -name "*.tsx" -type f
+
+# Count files
+ls -1 src/components | wc -l
+```
+
+**Git Operations:**
+```bash
+# Check status
+git status
+
+# View changes
+git diff
+
+# Stage and commit
+git add .
+git commit -m "feature: add new component"
+
+# View logs
+git log --oneline -10
+```
+
+### Path Handling in Git Bash
+- **Always use forward slashes** for paths: `src/components/Button.tsx`
+- **Avoid backslashes** even on Windows: `❌ src\components\Button.tsx`
+- **No quotes needed** for most paths: `cd src/components` works fine
+- **Environment variables** use `$NAME` syntax: `echo $HOME`
 
 ---
 
@@ -298,6 +389,32 @@ This approach keeps generated artifacts organized and separate from source code 
 
 ## Copilot Development Guidelines
 
+### Shell & Commands in Copilot Responses
+**⚠️ CRITICAL:** When Copilot suggests commands in responses, they MUST use **Git Bash syntax**:
+- ✅ Use `bash` code blocks: ` ```bash `
+- ✅ Use Unix/Linux commands: `ls`, `cat`, `grep`, `find`
+- ✅ Use forward slashes for paths: `src/components/Button.tsx`
+- ✅ Use `export` for environment variables: `export NODE_ENV=production`
+- ❌ Never use PowerShell commands: `Get-ChildItem`, `$Env:VAR`
+- ❌ Never use CMD commands: `dir`, `type`, `set VAR=value`
+- ❌ Never use backslashes: `src\components\Button.tsx`
+
+**Example of CORRECT Copilot response:**
+```bash
+# Start development server
+pnpm dev
+
+# Navigate and list components
+cd src/components
+ls -la
+
+# Search for specific pattern
+grep -r "useQuery" src/
+
+# View a file
+cat src/app/layout.tsx
+```
+
 ### Code Style
 - ✅ Use functional components with hooks (React 19)
 - ✅ Use TypeScript for all files (.ts, .tsx)
@@ -341,7 +458,7 @@ This approach keeps generated artifacts organized and separate from source code 
 
 ---
 
-**Last Updated:** December 18, 2025  
-**Format Version:** 1.0  
+**Last Updated:** January 31, 2026  
+**Format Version:** 1.1  
 **Environment:** Git Bash on Windows, WebStorm IDE  
-**Status:** ✅ Verified for Next.js 16 + React 19 + TypeScript
+**Status:** ✅ Verified for Next.js 16 + React 19 + TypeScript (Git Bash-optimized)
