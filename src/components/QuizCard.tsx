@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { ParsedQuestion } from '@/lib/quiz-parser';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface QuizCardProps {
   question: ParsedQuestion;
@@ -20,6 +21,7 @@ export function QuizCard({
   isFlagged = false,
   disabled = false,
 }: QuizCardProps) {
+  const { resolvedTheme } = useTheme();
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -28,6 +30,11 @@ export function QuizCard({
     setFeedback(null);
     setSelectedOption(null);
   }, []);
+
+  // Log theme changes for debugging
+  useEffect(() => {
+    console.log('Theme changed to:', resolvedTheme);
+  }, [resolvedTheme]);
 
   const handleOptionClick = (optionLabel: string) => {
     if (disabled || feedback) return;
@@ -39,61 +46,129 @@ export function QuizCard({
     onAnswer(optionLabel, isCorrect);
   };
 
+  const getButtonStyle = (option: { label: string; text: string }) => {
+    let bgColor = '#ffffff';
+    let textColor = '#111827';
+    let borderColor = '#d1d5db';
+
+    if (feedback) {
+      if (option.label === question.correctAnswer) {
+        bgColor = resolvedTheme === 'dark' ? '#064e3b' : '#dcfce7';
+        textColor = resolvedTheme === 'dark' ? '#86efac' : '#166534';
+        borderColor = '#22c55e';
+      } else if (selectedOption === option.label) {
+        bgColor = resolvedTheme === 'dark' ? '#7f1d1d' : '#fee2e2';
+        textColor = resolvedTheme === 'dark' ? '#fca5a5' : '#991b1b';
+        borderColor = '#ef4444';
+      } else {
+        bgColor = resolvedTheme === 'dark' ? '#374151' : '#ffffff';
+        textColor = resolvedTheme === 'dark' ? '#ffffff' : '#111827';
+        borderColor = resolvedTheme === 'dark' ? '#4b5563' : '#d1d5db';
+      }
+    } else {
+      if (selectedOption === option.label) {
+        bgColor = resolvedTheme === 'dark' ? '#1e3a8a' : '#dbeafe';
+        textColor = resolvedTheme === 'dark' ? '#93c5fd' : '#1e40af';
+        borderColor = '#60a5fa';
+      } else {
+        bgColor = resolvedTheme === 'dark' ? '#374151' : '#ffffff';
+        textColor = resolvedTheme === 'dark' ? '#ffffff' : '#111827';
+        borderColor = resolvedTheme === 'dark' ? '#4b5563' : '#d1d5db';
+      }
+    }
+
+    return { bgColor, textColor, borderColor };
+  };
+
   return (
-    <div className="flex flex-col gap-6 bg-white p-8 transition-colors dark:bg-gray-800">
+    <div 
+      className="flex flex-col gap-6 p-8 transition-colors"
+      style={{
+        backgroundColor: resolvedTheme === 'dark' ? '#1f2937' : '#ffffff',
+        color: resolvedTheme === 'dark' ? '#e5e7eb' : '#171717',
+      }}
+    >
       {/* Term */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+        <h2 
+          className="text-sm font-semibold"
+          style={{
+            color: resolvedTheme === 'dark' ? '#9ca3af' : '#4b5563',
+          }}
+        >
           TERM
         </h2>
-        <p className="mt-2 text-xl font-bold text-gray-900 dark:text-white">
+        <p 
+          className="mt-2 text-xl font-bold"
+          style={{
+            color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
+          }}
+        >
           {question.term}
         </p>
       </div>
 
       {/* Question */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 
+          className="text-lg font-semibold"
+          style={{
+            color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
+          }}
+        >
           {question.question}
         </h3>
       </div>
 
       {/* Options */}
       <div className="space-y-3">
-        {question.options.map((option) => (
-          <button
-            key={option.label}
-            type="button"
-            onClick={() => handleOptionClick(option.label)}
-            disabled={disabled || feedback !== null}
-            className={`w-full rounded-lg border-2 px-4 py-3 text-left font-medium text-lg transition-all ${
-              feedback
-                ? option.label === question.correctAnswer
-                  ? 'border-green-500 bg-green-50 text-green-900 dark:bg-green-900 dark:text-green-100'
-                  : selectedOption === option.label
-                    ? 'border-red-500 bg-red-50 text-red-900 dark:bg-red-900 dark:text-red-100'
-                    : 'border-gray-300 bg-white text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
-                : selectedOption === option.label
-                  ? 'border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
-                  : 'border-gray-300 bg-white text-gray-900 hover:border-blue-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
-            } ${
-              disabled || feedback !== null ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-            }`}
-          >
-            <span className="font-bold">{option.label})</span> {option.text}
-          </button>
-        ))}
+        {question.options.map((option) => {
+          const { bgColor, textColor, borderColor } = getButtonStyle(option);
+          return (
+            <button
+              key={option.label}
+              type="button"
+              onClick={() => handleOptionClick(option.label)}
+              disabled={disabled || feedback !== null}
+              className="w-full rounded-lg border-2 px-4 py-3 text-left font-medium text-lg transition-all"
+              style={{
+                backgroundColor: bgColor,
+                color: textColor,
+                borderColor: borderColor,
+                opacity: disabled || feedback !== null ? 0.6 : 1,
+                cursor: disabled || feedback !== null ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <span className="font-bold">{option.label})</span> {option.text}
+            </button>
+          );
+        })}
       </div>
 
       {/* Feedback */}
       <div
-        className={`rounded-lg px-4 py-3 text-center font-semibold min-h-11 flex items-center justify-center transition-colors ${
-          feedback
+        className="rounded-lg px-4 py-3 text-center font-semibold min-h-11 flex items-center justify-center transition-colors"
+        style={{
+          backgroundColor: feedback
             ? feedback === 'correct'
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-            : 'invisible'
-        }`}
+              ? resolvedTheme === 'dark'
+                ? '#064e3b'
+                : '#dcfce7'
+              : resolvedTheme === 'dark'
+                ? '#7f1d1d'
+                : '#fee2e2'
+            : 'transparent',
+          color: feedback
+            ? feedback === 'correct'
+              ? resolvedTheme === 'dark'
+                ? '#86efac'
+                : '#15803d'
+              : resolvedTheme === 'dark'
+                ? '#fca5a5'
+                : '#b91c1c'
+            : 'transparent',
+          visibility: feedback ? 'visible' : 'hidden',
+        }}
       >
         {feedback === 'correct' ? '✅ Correct!' : feedback === 'incorrect' ? '❌ Incorrect' : ''}
       </div>
@@ -103,11 +178,23 @@ export function QuizCard({
         <button
           type="button"
           onClick={() => onFlag(!isFlagged)}
-          className={`rounded-lg px-4 py-2 font-medium transition-all ${
-            isFlagged
-              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-          }`}
+          className="rounded-lg px-4 py-2 font-medium transition-all"
+          style={{
+            backgroundColor: isFlagged
+              ? resolvedTheme === 'dark'
+                ? '#713f12'
+                : '#fef3c7'
+              : resolvedTheme === 'dark'
+                ? '#374151'
+                : '#f3f4f6',
+            color: isFlagged
+              ? resolvedTheme === 'dark'
+                ? '#fde047'
+                : '#92400e'
+              : resolvedTheme === 'dark'
+                ? '#d1d5db'
+                : '#1f2937',
+          }}
         >
           {isFlagged ? '🚩 Flagged' : '🚩 Flag for review'}
         </button>
