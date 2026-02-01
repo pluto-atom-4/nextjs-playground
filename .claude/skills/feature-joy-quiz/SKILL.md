@@ -28,19 +28,12 @@ A complete quiz learning feature similar to Quizlet Learn Module. Enables users 
 
 ```
 QuizLayout
-├── QuizHeader (title, theme toggle, back button)
 ├── ProgressBar (current/total questions)
 ├── QuizCard (question display, options, feedback)
 └── QuizFooter (copyright)
 ```
 
 ### Components
-
-**QuizHeader**
-- Displays quiz title
-- Theme toggle for dark/light mode
-- Back button to navigate home
-- Props: `title`, `onBack?`
 
 **ProgressBar**
 - Visual progress indicator
@@ -104,9 +97,8 @@ src/
 ├── app/
 │   └── joy-quiz/
 │       ├── page.tsx              # Main quiz page (client component)
-│       └── layout.tsx            # Layout with header & footer
+│       └── layout.tsx            # Layout with footer
 ├── components/
-│   ├── QuizHeader.tsx
 │   ├── ProgressBar.tsx
 │   ├── QuizCard.tsx
 │   ├── QuizSummary.tsx
@@ -209,9 +201,11 @@ setTimeout(() => nextQuestion(), 3000); // Change 3000 to desired milliseconds
 ```
 
 ### Update Quiz Title
-Edit `src/app/joy-quiz/layout.tsx`:
+
+Edit `src/app/joy-quiz/page.tsx`:
 ```typescript
-<QuizHeader title="Your Quiz Title" onBack={...} />
+// Customize the quiz title in the page component
+const quizTitle = "Your Quiz Title";
 ```
 
 ### Customize Styling

@@ -53,8 +53,7 @@ A complete **Quizlet-style Quiz Learning Module** for the nextjs-playground proj
   - Retake and home navigation options
 
 - **Theme Support**
-  - Dark/light mode toggle in header
-  - Full dark mode styling
+  - Full dark/light mode styling
   - Integrated with existing ThemeSelector
 
 - **Data Persistence**
@@ -119,8 +118,8 @@ Without migration, the feature still works using browser memory.
 │     /joy-quiz Route                 │
 │  (QuizLayout + QuizPage)            │
 ├──────────┬──────────────┬───────────┤
-│ Header   │ Progress     │ Controls  │
-│ (Theme)  │ Bar          │ (Back)    │
+│ Progress │              │ Controls  │
+│ Bar      │              │           │
 ├──────────┴──────────────┴───────────┤
 │     QuizCard Component              │
 │  (Question + Options + Feedback)    │
@@ -195,25 +194,6 @@ Without migration, the feature still works using browser memory.
 ---
 
 ## 🧩 Components
-
-### QuizHeader
-**File:** `src/components/QuizHeader.tsx`
-
-Displays the quiz header with title, theme toggle, and back button.
-
-```typescript
-interface QuizHeaderProps {
-  title: string;
-  onBack?: () => void;
-}
-```
-
-**Features:**
-- Quiz title display
-- Dark/light theme toggle
-- Back button linking to home
-
----
 
 ### ProgressBar
 **File:** `src/components/ProgressBar.tsx`
@@ -349,10 +329,11 @@ const timer = setTimeout(() => {
 
 ### Update Quiz Title
 
-Edit `src/app/joy-quiz/layout.tsx`:
+Edit `src/app/joy-quiz/page.tsx`:
 
 ```typescript
-<QuizHeader title="Your New Title Here" />
+// Line ~30
+const quizName = 'your_quiz_file.csv';
 ```
 
 ### Customize Styling
@@ -520,7 +501,6 @@ src/app/joy-quiz/
 └── layout.tsx                             ← Layout wrapper
 
 src/components/
-├── QuizHeader.tsx                         ← Header component
 ├── ProgressBar.tsx                        ← Progress indicator
 ├── QuizCard.tsx                           ← Quiz interface
 ├── QuizSummary.tsx                        ← Results screen
