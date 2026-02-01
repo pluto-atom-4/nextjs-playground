@@ -56,7 +56,7 @@ export async function parseQuizCSV(filename: string): Promise<ParsedQuestion[]> 
     // Read definition (quoted, may span multiple lines)
     const problemStatement = defBlocks[0].split("\r\n")[1] || '';
     const choices: string[] = defBlocks[1] ? defBlocks[1].split("\r\n") : [];
-    const answerStatement = defBlocks.length > 2 ? defBlocks[2] : '';
+    const answerStatement = defBlocks.length > 2 ? defBlocks[2].replace(/"$/, "") : '';
 
     // Find options (lines with A), B), C), D))
     const options: { label: string; text: string }[] = [];
