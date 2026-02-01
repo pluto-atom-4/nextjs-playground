@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface QuizHeaderProps {
   title: string;
@@ -8,8 +9,16 @@ interface QuizHeaderProps {
 }
 
 export function QuizHeader({ title, onBack }: QuizHeaderProps) {
+  const { resolvedTheme } = useTheme();
+
   return (
-    <header className="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-900">
+    <header
+      className="border-b px-6 py-4"
+      style={{
+        backgroundColor: resolvedTheme === 'dark' ? '#111827' : '#ffffff',
+        borderColor: resolvedTheme === 'dark' ? '#374151' : '#e5e7eb',
+      }}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
@@ -20,11 +29,19 @@ export function QuizHeader({ title, onBack }: QuizHeaderProps) {
                 onBack();
               }
             }}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            style={{
+              color: resolvedTheme === 'dark' ? '#60a5fa' : '#2563eb',
+            }}
+            className="text-sm hover:opacity-80"
           >
             ← Back
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 
+            className="text-2xl font-bold"
+            style={{
+              color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
+            }}
+          >
             {title}
           </h1>
         </div>
