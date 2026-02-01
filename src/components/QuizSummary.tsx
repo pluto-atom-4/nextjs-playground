@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
 
 interface QuizSummaryProps {
@@ -8,6 +9,7 @@ interface QuizSummaryProps {
   correctCount: number;
   accuracy: number;
   flaggedCount: number;
+  onRetake?: () => void;
 }
 
 export function QuizSummary({
@@ -15,8 +17,10 @@ export function QuizSummary({
   correctCount,
   accuracy,
   flaggedCount,
+  onRetake,
 }: QuizSummaryProps) {
   const { resolvedTheme } = useTheme();
+  const router = useRouter();
 
   const getAccuracyColor = () => {
     if (accuracy >= 80) {
@@ -131,8 +135,15 @@ export function QuizSummary({
 
       {/* Actions */}
       <div className="flex gap-4">
-        <Link
-          href="/joy-quiz"
+        <button
+          type="button"
+          onClick={() => {
+            if (onRetake) {
+              onRetake();
+            } else {
+              router.refresh();
+            }
+          }}
           style={{
             display: 'inline-block',
             backgroundColor: resolvedTheme === 'dark' ? '#3b82f6' : '#2563eb',
@@ -140,11 +151,13 @@ export function QuizSummary({
             padding: '0.5rem 1.5rem',
             borderRadius: '0.5rem',
             fontWeight: '500',
+            border: 'none',
+            cursor: 'pointer',
           }}
           className="hover:opacity-90 transition-opacity"
         >
           Retake Quiz
-        </Link>
+        </button>
         <Link
           href="/"
           style={{

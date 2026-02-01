@@ -169,6 +169,38 @@ export default function QuizPage() {
     }
   }, [sessionId, questions.length, answered.size, flagged.size]);
 
+  const handleRetake = useCallback(async () => {
+    // Reset all quiz state for new session
+    setCurrentIndex(0);
+    setIsQuizComplete(false);
+    setSummary(null);
+    setFlagged(new Set());
+    setAnswered(new Set());
+    setLoading(true);
+
+    try {
+      // Create a new session
+      const { sessionId: sid } = await initializeQuizSession(quizName);
+      setSessionId(sid);
+
+      const qs = await getQuizQuestions(quizName);
+      setQuestions(qs);
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to reinitialize quiz:', error);
+      // Try to load questions anyway
+      try {
+        const qs = await getQuizQuestions(quizName);
+        setQuestions(qs);
+        setSessionId(`quiz-${Date.now()}`);
+      } catch {
+        console.error('Failed to load questions');
+      }
+      setLoading(false);
+    }
+  }, []);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -210,6 +242,7 @@ export default function QuizPage() {
         correctCount={summary.correctCount}
         accuracy={summary.accuracy}
         flaggedCount={summary.flaggedCount}
+        onRetake={handleRetake}
       />
     );
   }

@@ -1,6 +1,6 @@
 # Joy Quiz Feature
 
-A complete **Quizlet-style Quiz Learning Module** for the nextjs-playground project. This feature enables users to practice multiple choice quizzes with instant feedback, progress tracking, and optional persistent storage.
+A complete **Quizlet-style Quiz Learning Module** for the nextjs-playground project. This feature enables users to practice single choice quizzes with instant feedback, progress tracking, and optional persistent storage.
 
 **Route:** `/joy-quiz`  
 **Status:** ✅ Production Ready  
@@ -26,7 +26,7 @@ A complete **Quizlet-style Quiz Learning Module** for the nextjs-playground proj
 
 ### Core Functionality
 
-- **Multiple Choice Interface**
+- **Single Choice Interface**
   - 4-option questions (A, B, C, D)
   - Instant visual feedback with emojis
   - Real-time answer validation
@@ -231,7 +231,7 @@ interface QuizCardProps {
 
 **Features:**
 - Term and question display
-- 4 multiple choice options
+- 4 single choice options
 - Instant feedback (green/red)
 - Flag button
 - Disabled state after answering
@@ -406,7 +406,7 @@ generated/media/quizlet/quiz1_algorithms_multiple_choice.csv
 
 ```csv
 Term,Definition
-"Your Term","(Multiple Choice)
+"Your Term","(Single Choice)
 Q1 - Your Question Text Here?
 
 A) Option A

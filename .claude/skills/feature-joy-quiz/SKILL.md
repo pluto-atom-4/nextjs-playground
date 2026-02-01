@@ -1,16 +1,16 @@
 ---
 name: feature-joy-quiz
-description: Quizlet-style quiz learning module with multiple choice questions, progress tracking, and persistent storage for interactive learning experiences
+description: Quizlet-style quiz learning module with single choice questions, progress tracking, and persistent storage for interactive learning experiences
 license: MIT
 ---
 
 # Joy Quiz - Interactive Learning Module
 
-A complete quiz learning feature similar to Quizlet Learn Module. Enables users to practice multiple choice quizzes with instant feedback, progress tracking, and the ability to flag questions for later review. Includes real-time visual feedback with auto-advance timer and optional SQLite persistence.
+A complete quiz learning feature similar to Quizlet Learn Module. Enables users to practice Single choice quizzes with instant feedback, progress tracking, and the ability to flag questions for later review. Includes real-time visual feedback with auto-advance timer and optional SQLite persistence.
 
 ## Key Features
 
-- **Multiple Choice Interface**: Interactive question display with 4 selectable options
+- **Single Choice Interface**: Interactive question display with 4 selectable options
 - **CSV Data Loading**: Parse and load quizzes from CSV files
 - **Real-time Feedback**: Green for correct answers, red for incorrect with visual indicators
 - **Auto-advance**: Automatic progression to next question after 3 seconds
@@ -43,7 +43,7 @@ QuizLayout
 
 **QuizCard**
 - Question term and definition
-- 4 multiple choice options
+- 4 Single choice options
 - Instant feedback (green/red highlighting)
 - Flag button for marking difficult questions
 - Auto-advance countdown
@@ -123,7 +123,7 @@ Quizzes are stored as CSV files with structured data:
 
 ```csv
 Term,Definition
-"Your Term","(Multiple Choice)
+"Your Term","(Single Choice)
 
 Q1 - Your Question?
 
