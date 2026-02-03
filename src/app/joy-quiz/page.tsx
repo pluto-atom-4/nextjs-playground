@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { QuizCard } from '@/components/QuizCard';
 import { QuizSummary } from '@/components/QuizSummary';
 import { ProgressBar } from '@/components/ProgressBar';
+import { QuizNavigation } from '@/components/QuizNavigation';
 import type { ParsedQuestion } from '@/lib/quiz-parser';
 import completeQuizSession, {
   initializeQuizSession,
@@ -28,6 +29,7 @@ export default function QuizPage() {
   const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(
     null
   );
+  const [userAnswers, setUserAnswers] = useState<Map<number, string>>(new Map());
 
   const quizName = 'quiz1_algorithms_multiple_choice.csv';
 
@@ -99,8 +101,9 @@ export default function QuizPage() {
       }
 
       setAnswered((prev) => new Set(prev).add(currentIndex));
+      setUserAnswers((prev) => new Map(prev).set(currentIndex, selectedOption));
 
-      // Auto-advance after 3 seconds
+      // Auto-advance after 1.5 seconds
       const timer = setTimeout(() => {
         if (currentIndex + 1 >= questions.length) {
           handleQuizComplete();
@@ -176,6 +179,7 @@ export default function QuizPage() {
     setSummary(null);
     setFlagged(new Set());
     setAnswered(new Set());
+    setUserAnswers(new Map());
     setLoading(true);
 
     try {
@@ -209,6 +213,26 @@ export default function QuizPage() {
       }
     };
   }, [autoAdvanceTimer]);
+
+  const handlePrevious = useCallback(() => {
+    if (autoAdvanceTimer) {
+      clearTimeout(autoAdvanceTimer);
+      setAutoAdvanceTimer(null);
+    }
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  }, [currentIndex, autoAdvanceTimer]);
+
+  const handleNext = useCallback(() => {
+    if (autoAdvanceTimer) {
+      clearTimeout(autoAdvanceTimer);
+      setAutoAdvanceTimer(null);
+    }
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  }, [currentIndex, questions.length, autoAdvanceTimer]);
 
   if (loading) {
     return (
@@ -250,9 +274,10 @@ export default function QuizPage() {
   const currentQuestion = questions[currentIndex];
   const isAnswered = answered.has(currentIndex);
   const isFlaggedCurrent = flagged.has(currentIndex);
+  const previousAnswer = userAnswers.get(currentIndex) || null;
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen pt-8">
+    <div className="flex flex-col items-center justify-start min-h-screen pt-8 pb-8">
       <div className="w-240">
         <ProgressBar current={currentIndex} total={questions.length} />
 
@@ -264,6 +289,15 @@ export default function QuizPage() {
             onFlag={handleFlag}
             isFlagged={isFlaggedCurrent}
             disabled={isAnswered}
+            previousAnswer={previousAnswer}
+          />
+
+          <QuizNavigation
+            canGoBack={currentIndex > 0}
+            canGoForward={currentIndex < questions.length - 1}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            isAnswered={isAnswered}
           />
         </div>
       </div>

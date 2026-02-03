@@ -10,6 +10,7 @@ interface QuizCardProps {
   onFlag: (isFlagged: boolean) => void;
   isFlagged?: boolean;
   disabled?: boolean;
+  previousAnswer?: string | null;
 }
 
 type FeedbackType = 'correct' | 'incorrect' | null;
@@ -20,6 +21,7 @@ export function QuizCard({
   onFlag,
   isFlagged = false,
   disabled = false,
+  previousAnswer = null,
 }: QuizCardProps) {
   const { resolvedTheme } = useTheme();
   const [feedback, setFeedback] = useState<FeedbackType>(null);
@@ -27,9 +29,14 @@ export function QuizCard({
 
   // Clear feedback and selected option when component mounts (new question)
   useEffect(() => {
-    setFeedback(null);
-    setSelectedOption(null);
-  }, []);
+    if (previousAnswer) {
+      setSelectedOption(previousAnswer);
+      setFeedback(previousAnswer === question.correctAnswer ? 'correct' : 'incorrect');
+    } else {
+      setFeedback(null);
+      setSelectedOption(null);
+    }
+  }, [previousAnswer, question.correctAnswer]);
 
   // Log theme changes for debugging
   useEffect(() => {
