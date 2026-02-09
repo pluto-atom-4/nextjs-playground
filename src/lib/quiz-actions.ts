@@ -145,6 +145,18 @@ async function completeQuizSession(sessionId: string) {
       });
     }
 
+    // Get quiz questions to get correct answers
+    const questions = await parseQuizCSV(session.quizName);
+    const answersWithCorrect = session.userAnswers.map((answer) => {
+      const question = questions[answer.questionIndex];
+      return {
+        questionIndex: answer.questionIndex,
+        userAnswer: answer.selectedOption,
+        correctAnswer: question?.correctAnswer || '',
+        isCorrect: answer.isCorrect,
+      };
+    });
+
     return {
       sessionId: session.id,
       totalQuestions: session.totalQuestions,
@@ -153,7 +165,7 @@ async function completeQuizSession(sessionId: string) {
         (session.correctCount / session.totalQuestions) * 100
       ),
       flaggedCount: session.flaggedItems.filter((f) => f.isFlagged).length,
-      answers: session.userAnswers,
+      answers: answersWithCorrect,
     };
   } catch (error) {
     throwServerError(

@@ -260,12 +260,23 @@ export default function QuizPage() {
   }
 
   if (isQuizComplete && summary) {
+    const quizAnswers = (summary.answers || []).map((answer: any) => ({
+      questionIndex: answer.questionIndex,
+      term: questions[answer.questionIndex]?.term || '',
+      question: questions[answer.questionIndex]?.question || '',
+      userAnswer: answer.userAnswer,
+      correctAnswer: answer.correctAnswer,
+      isCorrect: answer.isCorrect,
+      options: questions[answer.questionIndex]?.options || [],
+    }));
+
     return (
       <QuizSummary
         totalQuestions={summary.totalQuestions}
         correctCount={summary.correctCount}
         accuracy={summary.accuracy}
         flaggedCount={summary.flaggedCount}
+        answers={quizAnswers}
         onRetake={handleRetake}
       />
     );
