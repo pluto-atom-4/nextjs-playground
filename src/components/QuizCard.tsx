@@ -8,6 +8,10 @@ interface QuizCardProps {
   question: ParsedQuestion;
   onAnswer: (selectedOption: string, isCorrect: boolean) => void;
   onFlag: (isFlagged: boolean) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  canGoBack?: boolean;
+  canGoForward?: boolean;
   isFlagged?: boolean;
   disabled?: boolean;
   previousAnswer?: string | null;
@@ -19,6 +23,10 @@ export function QuizCard({
   question,
   onAnswer,
   onFlag,
+  onPrevious,
+  onNext,
+  canGoBack = false,
+  canGoForward = false,
   isFlagged = false,
   disabled = false,
   previousAnswer = null,
@@ -180,8 +188,8 @@ export function QuizCard({
         {feedback === 'correct' ? '✅ Correct!' : feedback === 'incorrect' ? '❌ Incorrect' : ''}
       </div>
 
-      {/* Flag Button */}
-      <div className="flex justify-end">
+      {/* Flag Button and Navigation Buttons */}
+      <div className="flex gap-4 justify-between items-center">
         <button
           type="button"
           onClick={() => onFlag(!isFlagged)}
@@ -205,6 +213,67 @@ export function QuizCard({
         >
           {isFlagged ? '🚩 Flagged' : '🚩 Flag for review'}
         </button>
+
+        {/* Navigation Buttons */}
+        {(onPrevious || onNext) && (
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={!canGoBack}
+              className="rounded-lg px-6 py-2 font-medium transition-all"
+              style={{
+                backgroundColor: canGoBack
+                  ? resolvedTheme === 'dark'
+                    ? '#1e40af'
+                    : '#dbeafe'
+                  : resolvedTheme === 'dark'
+                    ? '#4b5563'
+                    : '#e5e7eb',
+                color: canGoBack
+                  ? resolvedTheme === 'dark'
+                    ? '#93c5fd'
+                    : '#1e40af'
+                  : resolvedTheme === 'dark'
+                    ? '#9ca3af'
+                    : '#9ca3af',
+                cursor: canGoBack ? 'pointer' : 'not-allowed',
+                opacity: canGoBack ? 1 : 0.6,
+              }}
+            >
+              ← Previous
+            </button>
+
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canGoForward}
+              className="rounded-lg px-6 py-2 font-medium transition-all"
+              style={{
+                backgroundColor:
+                  canGoForward
+                    ? resolvedTheme === 'dark'
+                      ? '#1e40af'
+                      : '#dbeafe'
+                    : resolvedTheme === 'dark'
+                      ? '#4b5563'
+                      : '#e5e7eb',
+                color:
+                  canGoForward
+                    ? resolvedTheme === 'dark'
+                      ? '#93c5fd'
+                      : '#1e40af'
+                    : resolvedTheme === 'dark'
+                      ? '#9ca3af'
+                      : '#9ca3af',
+                cursor: canGoForward ? 'pointer' : 'not-allowed',
+                opacity: canGoForward ? 1 : 0.6,
+              }}
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

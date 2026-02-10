@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { QuizCard } from '@/components/QuizCard';
 import { QuizSummary } from '@/components/QuizSummary';
 import { ProgressBar } from '@/components/ProgressBar';
-import { QuizNavigation } from '@/components/QuizNavigation';
 import type { ParsedQuestion } from '@/lib/quiz-parser';
 import completeQuizSession, {
   initializeQuizSession,
@@ -294,21 +293,17 @@ export default function QuizPage() {
 
         <div className="flex-1 overflow-y-auto">
           <QuizCard
-            key={currentQuestion.questionIndex}
+            key={currentIndex}
             question={currentQuestion}
             onAnswer={handleAnswer}
             onFlag={handleFlag}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            canGoBack={currentIndex > 0}
+            canGoForward={currentIndex < questions.length - 1}
             isFlagged={isFlaggedCurrent}
             disabled={isAnswered}
             previousAnswer={previousAnswer}
-          />
-
-          <QuizNavigation
-            canGoBack={currentIndex > 0}
-            canGoForward={currentIndex < questions.length - 1}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            isAnswered={isAnswered}
           />
         </div>
       </div>

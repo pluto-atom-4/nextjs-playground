@@ -64,7 +64,7 @@ export function QuizSummary({
         color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
       }}
     >
-      <div className="flex-1 flex flex-col gap-8 overflow-y-auto">
+      <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
         {/* Header */}
         <div className="text-center flex-shrink-0">
           <h2 className="text-3xl font-bold" style={{ color: 'inherit' }}>
@@ -85,7 +85,7 @@ export function QuizSummary({
           <div className="grid grid-cols-2 gap-4 w-full max-w-md">
           {/* Accuracy */}
           <div
-            className="rounded-lg p-4"
+            className="rounded-lg p-2"
             style={{
               backgroundColor: resolvedTheme === 'dark' ? '#374151' : '#f3f4f6',
             }}
@@ -99,7 +99,7 @@ export function QuizSummary({
               Accuracy
             </p>
             <p 
-              className="text-4xl font-bold"
+              className="text-2xl font-bold"
               style={{
                 color: getAccuracyColor(),
               }}
@@ -110,7 +110,7 @@ export function QuizSummary({
 
           {/* Score */}
           <div
-            className="rounded-lg p-4"
+            className="rounded-lg p-2"
             style={{
               backgroundColor: resolvedTheme === 'dark' ? '#374151' : '#f3f4f6',
             }}
@@ -124,7 +124,7 @@ export function QuizSummary({
               Score
             </p>
             <p 
-              className="text-4xl font-bold"
+              className="text-2xl font-bold"
               style={{
                 color: resolvedTheme === 'dark' ? '#60a5fa' : '#2563eb',
               }}
@@ -136,7 +136,7 @@ export function QuizSummary({
           {/* Flagged for Review - spans full width if present */}
           {flaggedCount > 0 && (
             <div
-              className="rounded-lg p-4 col-span-2"
+              className="rounded-lg p-2 col-span-2"
               style={{
                 backgroundColor: resolvedTheme === 'dark' ? '#713f12' : '#fef3c7',
               }}
@@ -162,8 +162,83 @@ export function QuizSummary({
         </div>
       </div>
 
+      {/* Correct/Incorrect Controls */}
+      {hasReviewableAnswers && (
+        <div className="flex justify-center gap-3 flex-wrap flex-shrink-0 mt-4">
+          <button
+            type="button"
+            onClick={() => setFilterType('all')}
+            className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor:
+                filterType === 'all'
+                  ? resolvedTheme === 'dark'
+                    ? '#3b82f6'
+                    : '#2563eb'
+                  : resolvedTheme === 'dark'
+                    ? '#374151'
+                    : '#e5e7eb',
+              color:
+                filterType === 'all'
+                  ? '#ffffff'
+                  : resolvedTheme === 'dark'
+                    ? '#f3f4f6'
+                    : '#111827',
+            }}
+          >
+            All answers ({answers.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType('correct')}
+            className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor:
+                filterType === 'correct'
+                  ? resolvedTheme === 'dark'
+                    ? '#16a34a'
+                    : '#22c55e'
+                  : resolvedTheme === 'dark'
+                    ? '#374151'
+                    : '#e5e7eb',
+              color:
+                filterType === 'correct'
+                  ? '#ffffff'
+                  : resolvedTheme === 'dark'
+                    ? '#f3f4f6'
+                    : '#111827',
+            }}
+          >
+            Correct ({answers.filter((a) => a.isCorrect).length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType('incorrect')}
+            className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor:
+                filterType === 'incorrect'
+                  ? resolvedTheme === 'dark'
+                    ? '#dc2626'
+                    : '#ef4444'
+                  : resolvedTheme === 'dark'
+                    ? '#374151'
+                    : '#e5e7eb',
+              color:
+                filterType === 'incorrect'
+                  ? '#ffffff'
+                  : resolvedTheme === 'dark'
+                    ? '#f3f4f6'
+                    : '#111827',
+            }}
+          >
+            Incorrect ({wrongAnswers.length})
+          </button>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex justify-center gap-4 w-full flex-shrink-0 mt-8">
+      <div className="flex justify-center gap-4 w-full flex-shrink-0 mt-4">
         <button
           type="button"
           onClick={() => {
@@ -210,119 +285,6 @@ export function QuizSummary({
             >
               Review Your Answers
             </h3>
-
-            {/* Summary stats */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <p
-                  className="text-sm"
-                  style={{
-                    color: resolvedTheme === 'dark' ? '#9ca3af' : '#4b5563',
-                  }}
-                >
-                  Correct
-                </p>
-                <p 
-                  className="text-2xl font-bold"
-                  style={{
-                    color: resolvedTheme === 'dark' ? '#86efac' : '#16a34a',
-                  }}
-                >
-                  {answers.filter((a) => a.isCorrect).length}
-                </p>
-              </div>
-              <div>
-                <p
-                  className="text-sm"
-                  style={{
-                    color: resolvedTheme === 'dark' ? '#9ca3af' : '#4b5563',
-                  }}
-                >
-                  Incorrect
-                </p>
-                <p 
-                  className="text-2xl font-bold"
-                  style={{
-                    color: resolvedTheme === 'dark' ? '#fca5a5' : '#dc2626',
-                  }}
-                >
-                  {wrongAnswers.length}
-                </p>
-              </div>
-            </div>
-
-            {/* Filter Buttons */}
-            <div className="flex gap-3 mb-6 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setFilterType('all')}
-                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor:
-                    filterType === 'all'
-                      ? resolvedTheme === 'dark'
-                        ? '#3b82f6'
-                        : '#2563eb'
-                      : resolvedTheme === 'dark'
-                        ? '#374151'
-                        : '#e5e7eb',
-                  color:
-                    filterType === 'all'
-                      ? '#ffffff'
-                      : resolvedTheme === 'dark'
-                        ? '#f3f4f6'
-                        : '#111827',
-                }}
-              >
-                All answers ({answers.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterType('correct')}
-                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor:
-                    filterType === 'correct'
-                      ? resolvedTheme === 'dark'
-                        ? '#16a34a'
-                        : '#22c55e'
-                      : resolvedTheme === 'dark'
-                        ? '#374151'
-                        : '#e5e7eb',
-                  color:
-                    filterType === 'correct'
-                      ? '#ffffff'
-                      : resolvedTheme === 'dark'
-                        ? '#f3f4f6'
-                        : '#111827',
-                }}
-              >
-                Correct ({answers.filter((a) => a.isCorrect).length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterType('incorrect')}
-                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor:
-                    filterType === 'incorrect'
-                      ? resolvedTheme === 'dark'
-                        ? '#dc2626'
-                        : '#ef4444'
-                      : resolvedTheme === 'dark'
-                        ? '#374151'
-                        : '#e5e7eb',
-                  color:
-                    filterType === 'incorrect'
-                      ? '#ffffff'
-                      : resolvedTheme === 'dark'
-                        ? '#f3f4f6'
-                        : '#111827',
-                }}
-              >
-                Incorrect ({wrongAnswers.length})
-              </button>
-            </div>
 
             {/* All answers review */}
             <div>
