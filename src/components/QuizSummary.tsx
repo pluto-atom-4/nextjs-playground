@@ -35,6 +35,7 @@ export function QuizSummary({
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'correct' | 'incorrect'>('all');
 
   const getAccuracyColor = () => {
     if (accuracy >= 80) {
@@ -48,6 +49,12 @@ export function QuizSummary({
 
   const wrongAnswers = answers.filter((answer) => !answer.isCorrect);
   const hasReviewableAnswers = answers.length > 0;
+
+  const filteredAnswers = answers.filter((answer) => {
+    if (filterType === 'correct') return answer.isCorrect;
+    if (filterType === 'incorrect') return !answer.isCorrect;
+    return true;
+  });
 
   return (
     <div
@@ -244,6 +251,79 @@ export function QuizSummary({
               </div>
             </div>
 
+            {/* Filter Buttons */}
+            <div className="flex gap-3 mb-6 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setFilterType('all')}
+                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor:
+                    filterType === 'all'
+                      ? resolvedTheme === 'dark'
+                        ? '#3b82f6'
+                        : '#2563eb'
+                      : resolvedTheme === 'dark'
+                        ? '#374151'
+                        : '#e5e7eb',
+                  color:
+                    filterType === 'all'
+                      ? '#ffffff'
+                      : resolvedTheme === 'dark'
+                        ? '#f3f4f6'
+                        : '#111827',
+                }}
+              >
+                All answers ({answers.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType('correct')}
+                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor:
+                    filterType === 'correct'
+                      ? resolvedTheme === 'dark'
+                        ? '#16a34a'
+                        : '#22c55e'
+                      : resolvedTheme === 'dark'
+                        ? '#374151'
+                        : '#e5e7eb',
+                  color:
+                    filterType === 'correct'
+                      ? '#ffffff'
+                      : resolvedTheme === 'dark'
+                        ? '#f3f4f6'
+                        : '#111827',
+                }}
+              >
+                Correct ({answers.filter((a) => a.isCorrect).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType('incorrect')}
+                className="px-4 py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor:
+                    filterType === 'incorrect'
+                      ? resolvedTheme === 'dark'
+                        ? '#dc2626'
+                        : '#ef4444'
+                      : resolvedTheme === 'dark'
+                        ? '#374151'
+                        : '#e5e7eb',
+                  color:
+                    filterType === 'incorrect'
+                      ? '#ffffff'
+                      : resolvedTheme === 'dark'
+                        ? '#f3f4f6'
+                        : '#111827',
+                }}
+              >
+                Incorrect ({wrongAnswers.length})
+              </button>
+            </div>
+
             {/* All answers review */}
             <div>
               <h4
@@ -252,10 +332,13 @@ export function QuizSummary({
                   color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
                 }}
               >
-                All Answers ({answers.length})
+                {filterType === 'all' && `All Answers (${filteredAnswers.length})`}
+                {filterType === 'correct' && `Correct Answers (${filteredAnswers.length})`}
+                {filterType === 'incorrect' && `Incorrect Answers (${filteredAnswers.length})`}
               </h4>
-              <div className="space-y-3">
-                {answers.map((answer) => (
+              {filteredAnswers.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredAnswers.map((answer) => (
                   <div
                     key={answer.questionIndex}
                     className="rounded-lg overflow-hidden"
@@ -375,7 +458,17 @@ export function QuizSummary({
                     )}
                   </div>
                 ))}
-              </div>
+                </div>
+              ) : (
+                <div
+                  className="text-center py-8"
+                  style={{
+                    color: resolvedTheme === 'dark' ? '#9ca3af' : '#4b5563',
+                  }}
+                >
+                  <p>No answers match the selected filter</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
