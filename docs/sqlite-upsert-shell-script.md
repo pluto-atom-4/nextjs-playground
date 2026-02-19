@@ -13,9 +13,6 @@ The core upsert utility that inserts or updates a single file record in SQLite.
 ```bash
 # Direct execution
 bash scripts/upsert-file-record.sh [db_name] <file_name> <create_date> <updated_date> <hash>
-
-# Via NPM script
-pnpm db:upsert [db_name] <file_name> <create_date> <updated_date> <hash>
 ```
 
 ### Parameters
@@ -29,7 +26,7 @@ pnpm db:upsert [db_name] <file_name> <create_date> <updated_date> <hash>
 ### Example
 
 ```bash
-pnpm db:upsert files_meta.db "example.txt" "2023-01-01" "2024-02-19" "abc123hash"
+bash scripts/upsert-file-record.sh files_meta.db "example.txt" "2023-01-01" "2024-02-19" "abc123hash"
 ```
 
 ### Key Features
@@ -250,7 +247,7 @@ CREATE_DATE=$(stat -c '%w' file.txt 2>/dev/null || stat -c '%y' file.txt)
 UPDATE_DATE=$(stat -c '%y' file.txt)
 FILE_HASH=$(md5sum file.txt | awk '{ print $1 }')
 
-pnpm db:upsert files_meta.db "file.txt" "$CREATE_DATE" "$UPDATE_DATE" "$FILE_HASH"
+bash scripts/upsert-file-record.sh files_meta.db "file.txt" "$CREATE_DATE" "$UPDATE_DATE" "$FILE_HASH"
 ```
 
 ---
