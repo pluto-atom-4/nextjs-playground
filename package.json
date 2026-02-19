@@ -26,6 +26,9 @@
     "seed": "tsx src/lib/seed.ts",
     "prisma:studio": "prisma studio",
     "db:verify": "tsx verify-database.ts",
+    "azurite:start": "bash scripts/start-azurite.sh",
+    "azurite:stop": "bash scripts/stop-azurite.sh",
+    "postinstall": "prisma generate",
     "prepare": "husky"
   },
   "dependencies": {
