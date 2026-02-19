@@ -28,6 +28,9 @@
     "db:verify": "tsx verify-database.ts",
     "azurite:start": "bash scripts/start-azurite.sh",
     "azurite:stop": "bash scripts/stop-azurite.sh",
+    "blob:monitor": "bash scripts/monitor-blob-events.sh",
+    "db:upsert": "bash scripts/upsert-file-record.sh",
+    "db:watch": "bash scripts/watch-dir-upsert.sh",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },
