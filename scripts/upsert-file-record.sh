@@ -3,6 +3,7 @@
 # upsert-file-record.sh
 # Insert or update file metadata records in SQLite database
 # Automatically triggered by file system changes
+# Includes: file_name, create_date, updated_date, hash, content_type
 
 # Color codes for output
 GREEN='\033[0;32m'
@@ -17,13 +18,14 @@ FILE_NAME="${2}"
 CREATE_DATE="${3}"
 UPDATE_DATE="${4}"
 FILE_HASH="${5}"
+CONTENT_TYPE="${6:-application/octet-stream}"
 
 # Check for required arguments
 if [ -z "$FILE_NAME" ] || [ -z "$CREATE_DATE" ] || [ -z "$UPDATE_DATE" ] || [ -z "$FILE_HASH" ]; then
-    echo -e "${RED}Usage: $0 [db_name] <file_name> <create_date> <updated_date> <hash>${NC}"
+    echo -e "${RED}Usage: $0 [db_name] <file_name> <create_date> <updated_date> <hash> [content_type]${NC}"
     echo ""
     echo "Example:"
-    echo "  $0 files_meta.db example.txt '2023-01-01' '2024-02-19' 'abc123hash'"
+    echo "  $0 files_meta.db example.txt '2023-01-01' '2024-02-19' 'abc123hash' 'text/plain'"
     exit 1
 fi
 
@@ -39,6 +41,7 @@ fi
 echo -e "${BLUE}SQLite Upsert Record${NC}"
 echo -e "${YELLOW}Database:${NC} $DB_NAME"
 echo -e "${YELLOW}File:${NC} $FILE_NAME"
+echo -e "${YELLOW}Content-Type:${NC} $CONTENT_TYPE"
 
 # Initialize database and table if they don't exist
 sqlite3 "$DB_NAME" <<EOF
@@ -46,17 +49,19 @@ CREATE TABLE IF NOT EXISTS file_records (
     file_name TEXT PRIMARY KEY,
     create_date TEXT,
     updated_date TEXT,
-    hash TEXT
+    hash TEXT,
+    content_type TEXT
 );
 EOF
 
 # Perform the UPSERT (Insert or Update on Conflict)
 sqlite3 "$DB_NAME" <<EOF
-INSERT INTO file_records (file_name, create_date, updated_date, hash)
-VALUES ('$FILE_NAME', '$CREATE_DATE', '$UPDATE_DATE', '$FILE_HASH')
+INSERT INTO file_records (file_name, create_date, updated_date, hash, content_type)
+VALUES ('$FILE_NAME', '$CREATE_DATE', '$UPDATE_DATE', '$FILE_HASH', '$CONTENT_TYPE')
 ON CONFLICT(file_name) DO UPDATE SET
     updated_date=excluded.updated_date,
-    hash=excluded.hash;
+    hash=excluded.hash,
+    content_type=excluded.content_type;
 EOF
 
 if [ $? -eq 0 ]; then
