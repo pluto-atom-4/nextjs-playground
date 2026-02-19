@@ -87,3 +87,12 @@ model FlaggedQuiz {
   @@unique([sessionId, questionIndex])
   @@map("flagged_quizzes")
 }
+
+model FileRecord {
+  fileName    String  @id @map("file_name")
+  createDate  String? @map("create_date")
+  updatedDate String? @map("updated_date")
+  hash        String?
+  contentType String? @map("content_type")
+  @@map("file_records")
+}
