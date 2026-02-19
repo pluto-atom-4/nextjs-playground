@@ -103,6 +103,54 @@ This folder contains comprehensive documentation for implementing a Next.js data
 
 ---
 
+### 4. **Azure Blob Storage Events (Linux)** (`azure-blob-storage-events-linux.md`)
+**Purpose:** Guide to replicate Azure Blob Storage events using native Linux tools  
+**Size:** 3,010 characters | ~3 KB  
+**Key Sections:**
+- Event-driven architecture overview (inotify subsystem)
+- Shell script implementation (`monitor.sh`)
+- Component explanation (inotifywait, curl, pipes)
+- Prerequisites and installation instructions
+- Background execution with `nohup`
+
+**Read this if:**
+- You need to monitor file system events on Linux
+- You want to replicate Azure Blob Storage behavior locally
+- You need event-driven notifications on file creation/modification
+- You're setting up local development for blob storage workflows
+
+**Key Stats:**
+- ✅ Complete shell script example
+- ✅ Installation instructions for all major Linux distributions
+- ✅ Architecture explanation with real-world use case
+
+---
+
+### 5. **SQLite Upsert Shell Script** (`sqlite-upsert-shell-script.md`)
+**Purpose:** Automate SQLite database operations with file monitoring  
+**Size:** 3,758 characters | ~3.5 KB  
+**Key Sections:**
+- Bash script for INSERT/UPDATE operations (UPSERT pattern)
+- Database initialization and conflict handling
+- Directory monitoring with `inotifywait`
+- Automatic metadata extraction (dates, hashes)
+- Background process execution
+- Alternative tools (`entr`)
+
+**Read this if:**
+- You need to track file metadata in SQLite
+- You want to automate database updates on file changes
+- You need UPSERT (insert-or-update) patterns in bash
+- You want to integrate file system events with database operations
+
+**Key Stats:**
+- ✅ Complete upsert script with error handling
+- ✅ Directory monitoring implementation
+- ✅ Metadata extraction (stat, md5sum)
+- ✅ Multiple execution patterns
+
+---
+
 ## 🎯 Quick Start Guide
 
 ### Phase-by-Phase Reading Order
@@ -309,6 +357,8 @@ pnpm dev                     # Start dev server
 - `implent-plan-fetching-data.md` – Full implementation plan (1,027 lines)
 - `test-plan.md` – Comprehensive testing guide (1,410 lines)
 - `database-setup.md` – Step-by-step database setup (817 lines)
+- `azure-blob-storage-events-linux.md` – Linux file system event monitoring guide
+- `sqlite-upsert-shell-script.md` – SQLite UPSERT automation with file monitoring
 
 ---
 
