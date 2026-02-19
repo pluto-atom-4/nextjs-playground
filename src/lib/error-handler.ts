@@ -14,9 +14,9 @@
  * ```
  */
 
-import { createLogger } from '@/lib/logger';
+import { createLogger } from "@/lib/logger";
 
-const logger = createLogger({ prefix: 'SERVER_ACTION' });
+const logger = createLogger({ prefix: "SERVER_ACTION" });
 
 export interface ServerErrorOptions {
   /**
@@ -60,16 +60,16 @@ export interface ServerErrorOptions {
 export function throwServerError(
   message: string,
   error: Error | unknown,
-  options: ServerErrorOptions = {}
+  options: ServerErrorOptions = {},
 ): never {
   const {
     context,
-    includeStack = process.env.NODE_ENV === 'development',
-    messagePrefix = 'Server action error',
+    includeStack = process.env.NODE_ENV === "development",
+    messagePrefix = "Server action error",
   } = options;
 
   // Build the full message with context
-  const contextPrefix = context ? `[${context}]` : '';
+  const contextPrefix = context ? `[${context}]` : "";
   const fullMessage = `${messagePrefix} [${includeStack}] ${contextPrefix}: ${message}`.trim();
 
   // Log the error with structured logging
@@ -107,15 +107,12 @@ export function handleServerError<T>(
   error: Error | unknown,
   fallbackValue: T,
   message: string,
-  options: ServerErrorOptions = {}
+  options: ServerErrorOptions = {},
 ): T {
-  const {
-    context,
-    messagePrefix = 'Server action error',
-  } = options;
+  const { context, messagePrefix = "Server action error" } = options;
 
   // Build the full message with context
-  const contextPrefix = context ? `[${context}]` : '';
+  const contextPrefix = context ? `[${context}]` : "";
   const fullMessage = `${messagePrefix} ${contextPrefix}: ${message}`.trim();
 
   // Log the error
@@ -123,4 +120,37 @@ export function handleServerError<T>(
 
   // Return the fallback value
   return fallbackValue;
+}
+
+/**
+ * Format error message for client-side display
+ *
+ * Use this helper in client components to format error objects into user-friendly messages
+ * without throwing exceptions. This prevents the "throw caught locally" anti-pattern.
+ *
+ * @param error - The caught error object
+ * @param defaultMessage - Fallback message if error cannot be parsed
+ * @returns Formatted error message string
+ *
+ * @example
+ * try {
+ *   const response = await fetch('/api/data');
+ * } catch (error) {
+ *   const message = formatClientError(error, 'Failed to load data');
+ *   setError(message);
+ * }
+ */
+export function formatClientError(
+  error: Error | unknown,
+  defaultMessage = "An error occurred",
+): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return defaultMessage;
 }
