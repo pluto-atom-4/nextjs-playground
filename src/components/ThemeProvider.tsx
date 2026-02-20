@@ -28,14 +28,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     let effectiveTheme: "dark" | "light";
 
     if (theme === "system") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     } else {
       effectiveTheme = theme;
     }
@@ -60,7 +60,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to system theme changes
   useEffect(() => {
-    if (theme !== "system" || !mounted) return;
+    if (theme !== "system" || !mounted) {
+      return;
+    }
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
@@ -95,4 +97,3 @@ export function useTheme() {
   }
   return context;
 }
-

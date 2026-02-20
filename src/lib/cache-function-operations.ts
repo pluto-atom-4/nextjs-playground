@@ -1,8 +1,8 @@
 // Function-level cache utilities with 'use cache'
 
-import { createLogger } from '@/lib/logger';
+import { createLogger } from "@/lib/logger";
 
-const logger = createLogger({ prefix: 'FUNCTION-CACHE' });
+const logger = createLogger({ prefix: "FUNCTION-CACHE" });
 
 interface FunctionCacheStats {
   functionName: string;
@@ -14,11 +14,7 @@ interface FunctionCacheStats {
 
 const functionStats: Map<string, FunctionCacheStats> = new Map();
 
-export function recordFunctionCall(
-  functionName: string,
-  executionTime: number,
-  isHit: boolean
-) {
+export function recordFunctionCall(functionName: string, executionTime: number, isHit: boolean) {
   const existing = functionStats.get(functionName) || {
     functionName,
     hits: 0,
@@ -51,7 +47,9 @@ export async function calculateFibonacci(n: number) {
 
   // Simulate heavy computation
   const fib = (num: number): number => {
-    if (num <= 1) return num;
+    if (num <= 1) {
+      return num;
+    }
     return fib(num - 1) + fib(num - 2);
   };
 
@@ -61,7 +59,7 @@ export async function calculateFibonacci(n: number) {
   const endTime = performance.now();
   const executionTime = endTime - startTime;
 
-  recordFunctionCall('calculateFibonacci', executionTime, false);
+  recordFunctionCall("calculateFibonacci", executionTime, false);
 
   return {
     input: n,
@@ -83,12 +81,12 @@ export async function fetchWeatherData(city: string) {
   const endTime = performance.now();
   const executionTime = endTime - startTime;
 
-  recordFunctionCall('fetchWeatherData', executionTime, false);
+  recordFunctionCall("fetchWeatherData", executionTime, false);
 
   return {
     city,
     temperature: Math.floor(Math.random() * 30) + 5,
-    condition: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
+    condition: ["Sunny", "Cloudy", "Rainy", "Snowy"][Math.floor(Math.random() * 4)],
     humidity: Math.floor(Math.random() * 100),
     fetchedAt: new Date().toISOString(),
     executionMs: Math.round(executionTime),
@@ -107,7 +105,7 @@ export async function processUserData(userId: string) {
   const endTime = performance.now();
   const executionTime = endTime - startTime;
 
-  recordFunctionCall('processUserData', executionTime, false);
+  recordFunctionCall("processUserData", executionTime, false);
 
   return {
     userId,
@@ -121,4 +119,3 @@ export async function processUserData(userId: string) {
     executionMs: Math.round(executionTime),
   };
 }
-

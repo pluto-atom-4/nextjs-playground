@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { ParsedQuestion } from '@/lib/quiz-parser';
-import { useTheme } from '@/components/ThemeProvider';
+import { useTheme } from "@/components/ThemeProvider";
+import type { ParsedQuestion } from "@/lib/quiz-parser";
+import { useEffect, useState } from "react";
 
 interface QuizCardProps {
   question: ParsedQuestion;
@@ -17,7 +17,7 @@ interface QuizCardProps {
   previousAnswer?: string | null;
 }
 
-type FeedbackType = 'correct' | 'incorrect' | null;
+type FeedbackType = "correct" | "incorrect" | null;
 
 export function QuizCard({
   question,
@@ -39,56 +39,53 @@ export function QuizCard({
   useEffect(() => {
     if (previousAnswer) {
       setSelectedOption(previousAnswer);
-      setFeedback(previousAnswer === question.correctAnswer ? 'correct' : 'incorrect');
+      setFeedback(previousAnswer === question.correctAnswer ? "correct" : "incorrect");
     } else {
       setFeedback(null);
       setSelectedOption(null);
     }
   }, [previousAnswer, question.correctAnswer]);
 
-  // Log theme changes for debugging
-  useEffect(() => {
-    console.log('Theme changed to:', resolvedTheme);
-  }, [resolvedTheme]);
-
   const handleOptionClick = (optionLabel: string) => {
-    if (disabled || feedback) return;
+    if (disabled || feedback) {
+      return;
+    }
 
     const isCorrect = optionLabel === question.correctAnswer;
     setSelectedOption(optionLabel);
-    setFeedback(isCorrect ? 'correct' : 'incorrect');
+    setFeedback(isCorrect ? "correct" : "incorrect");
 
     onAnswer(optionLabel, isCorrect);
   };
 
   const getButtonStyle = (option: { label: string; text: string }) => {
-    let bgColor = '#ffffff';
-    let textColor = '#111827';
-    let borderColor = '#d1d5db';
+    let bgColor = "#ffffff";
+    let textColor = "#111827";
+    let borderColor = "#d1d5db";
 
     if (feedback) {
       if (option.label === question.correctAnswer) {
-        bgColor = resolvedTheme === 'dark' ? '#064e3b' : '#dcfce7';
-        textColor = resolvedTheme === 'dark' ? '#86efac' : '#166534';
-        borderColor = '#22c55e';
+        bgColor = resolvedTheme === "dark" ? "#064e3b" : "#dcfce7";
+        textColor = resolvedTheme === "dark" ? "#86efac" : "#166534";
+        borderColor = "#22c55e";
       } else if (selectedOption === option.label) {
-        bgColor = resolvedTheme === 'dark' ? '#7f1d1d' : '#fee2e2';
-        textColor = resolvedTheme === 'dark' ? '#fca5a5' : '#991b1b';
-        borderColor = '#ef4444';
+        bgColor = resolvedTheme === "dark" ? "#7f1d1d" : "#fee2e2";
+        textColor = resolvedTheme === "dark" ? "#fca5a5" : "#991b1b";
+        borderColor = "#ef4444";
       } else {
-        bgColor = resolvedTheme === 'dark' ? '#374151' : '#ffffff';
-        textColor = resolvedTheme === 'dark' ? '#ffffff' : '#111827';
-        borderColor = resolvedTheme === 'dark' ? '#4b5563' : '#d1d5db';
+        bgColor = resolvedTheme === "dark" ? "#374151" : "#ffffff";
+        textColor = resolvedTheme === "dark" ? "#ffffff" : "#111827";
+        borderColor = resolvedTheme === "dark" ? "#4b5563" : "#d1d5db";
       }
     } else {
       if (selectedOption === option.label) {
-        bgColor = resolvedTheme === 'dark' ? '#1e3a8a' : '#dbeafe';
-        textColor = resolvedTheme === 'dark' ? '#93c5fd' : '#1e40af';
-        borderColor = '#60a5fa';
+        bgColor = resolvedTheme === "dark" ? "#1e3a8a" : "#dbeafe";
+        textColor = resolvedTheme === "dark" ? "#93c5fd" : "#1e40af";
+        borderColor = "#60a5fa";
       } else {
-        bgColor = resolvedTheme === 'dark' ? '#374151' : '#ffffff';
-        textColor = resolvedTheme === 'dark' ? '#ffffff' : '#111827';
-        borderColor = resolvedTheme === 'dark' ? '#4b5563' : '#d1d5db';
+        bgColor = resolvedTheme === "dark" ? "#374151" : "#ffffff";
+        textColor = resolvedTheme === "dark" ? "#ffffff" : "#111827";
+        borderColor = resolvedTheme === "dark" ? "#4b5563" : "#d1d5db";
       }
     }
 
@@ -96,27 +93,27 @@ export function QuizCard({
   };
 
   return (
-    <div 
+    <div
       className="flex flex-col gap-6 p-8 transition-colors"
       style={{
-        backgroundColor: resolvedTheme === 'dark' ? '#1f2937' : '#ffffff',
-        color: resolvedTheme === 'dark' ? '#e5e7eb' : '#171717',
+        backgroundColor: resolvedTheme === "dark" ? "#1f2937" : "#ffffff",
+        color: resolvedTheme === "dark" ? "#e5e7eb" : "#171717",
       }}
     >
       {/* Term */}
       <div>
-        <h2 
+        <h2
           className="text-sm font-semibold"
           style={{
-            color: resolvedTheme === 'dark' ? '#9ca3af' : '#4b5563',
+            color: resolvedTheme === "dark" ? "#9ca3af" : "#4b5563",
           }}
         >
           TERM
         </h2>
-        <p 
+        <p
           className="mt-2 text-xl font-bold"
           style={{
-            color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
+            color: resolvedTheme === "dark" ? "#f3f4f6" : "#111827",
           }}
         >
           {question.term}
@@ -125,10 +122,10 @@ export function QuizCard({
 
       {/* Question */}
       <div>
-        <h3 
+        <h3
           className="text-lg font-semibold"
           style={{
-            color: resolvedTheme === 'dark' ? '#f3f4f6' : '#111827',
+            color: resolvedTheme === "dark" ? "#f3f4f6" : "#111827",
           }}
         >
           {question.question}
@@ -151,7 +148,7 @@ export function QuizCard({
                 color: textColor,
                 borderColor: borderColor,
                 opacity: disabled || feedback !== null ? 0.6 : 1,
-                cursor: disabled || feedback !== null ? 'not-allowed' : 'pointer',
+                cursor: disabled || feedback !== null ? "not-allowed" : "pointer",
               }}
             >
               <span className="font-bold">{option.label})</span> {option.text}
@@ -165,27 +162,27 @@ export function QuizCard({
         className="rounded-lg px-4 py-3 text-center font-semibold min-h-11 flex items-center justify-center transition-colors"
         style={{
           backgroundColor: feedback
-            ? feedback === 'correct'
-              ? resolvedTheme === 'dark'
-                ? '#064e3b'
-                : '#dcfce7'
-              : resolvedTheme === 'dark'
-                ? '#7f1d1d'
-                : '#fee2e2'
-            : 'transparent',
+            ? feedback === "correct"
+              ? resolvedTheme === "dark"
+                ? "#064e3b"
+                : "#dcfce7"
+              : resolvedTheme === "dark"
+                ? "#7f1d1d"
+                : "#fee2e2"
+            : "transparent",
           color: feedback
-            ? feedback === 'correct'
-              ? resolvedTheme === 'dark'
-                ? '#86efac'
-                : '#15803d'
-              : resolvedTheme === 'dark'
-                ? '#fca5a5'
-                : '#b91c1c'
-            : 'transparent',
-          visibility: feedback ? 'visible' : 'hidden',
+            ? feedback === "correct"
+              ? resolvedTheme === "dark"
+                ? "#86efac"
+                : "#15803d"
+              : resolvedTheme === "dark"
+                ? "#fca5a5"
+                : "#b91c1c"
+            : "transparent",
+          visibility: feedback ? "visible" : "hidden",
         }}
       >
-        {feedback === 'correct' ? '✅ Correct!' : feedback === 'incorrect' ? '❌ Incorrect' : ''}
+        {feedback === "correct" ? "✅ Correct!" : feedback === "incorrect" ? "❌ Incorrect" : ""}
       </div>
 
       {/* Flag Button and Navigation Buttons */}
@@ -196,22 +193,22 @@ export function QuizCard({
           className="rounded-lg px-4 py-2 font-medium transition-all"
           style={{
             backgroundColor: isFlagged
-              ? resolvedTheme === 'dark'
-                ? '#713f12'
-                : '#fef3c7'
-              : resolvedTheme === 'dark'
-                ? '#374151'
-                : '#f3f4f6',
+              ? resolvedTheme === "dark"
+                ? "#713f12"
+                : "#fef3c7"
+              : resolvedTheme === "dark"
+                ? "#374151"
+                : "#f3f4f6",
             color: isFlagged
-              ? resolvedTheme === 'dark'
-                ? '#fde047'
-                : '#92400e'
-              : resolvedTheme === 'dark'
-                ? '#d1d5db'
-                : '#1f2937',
+              ? resolvedTheme === "dark"
+                ? "#fde047"
+                : "#92400e"
+              : resolvedTheme === "dark"
+                ? "#d1d5db"
+                : "#1f2937",
           }}
         >
-          {isFlagged ? '🚩 Flagged' : '🚩 Flag for review'}
+          {isFlagged ? "🚩 Flagged" : "🚩 Flag for review"}
         </button>
 
         {/* Navigation Buttons */}
@@ -224,20 +221,20 @@ export function QuizCard({
               className="rounded-lg px-6 py-2 font-medium transition-all"
               style={{
                 backgroundColor: canGoBack
-                  ? resolvedTheme === 'dark'
-                    ? '#1e40af'
-                    : '#dbeafe'
-                  : resolvedTheme === 'dark'
-                    ? '#4b5563'
-                    : '#e5e7eb',
+                  ? resolvedTheme === "dark"
+                    ? "#1e40af"
+                    : "#dbeafe"
+                  : resolvedTheme === "dark"
+                    ? "#4b5563"
+                    : "#e5e7eb",
                 color: canGoBack
-                  ? resolvedTheme === 'dark'
-                    ? '#93c5fd'
-                    : '#1e40af'
-                  : resolvedTheme === 'dark'
-                    ? '#9ca3af'
-                    : '#9ca3af',
-                cursor: canGoBack ? 'pointer' : 'not-allowed',
+                  ? resolvedTheme === "dark"
+                    ? "#93c5fd"
+                    : "#1e40af"
+                  : resolvedTheme === "dark"
+                    ? "#9ca3af"
+                    : "#9ca3af",
+                cursor: canGoBack ? "pointer" : "not-allowed",
                 opacity: canGoBack ? 1 : 0.6,
               }}
             >
@@ -250,23 +247,21 @@ export function QuizCard({
               disabled={!canGoForward}
               className="rounded-lg px-6 py-2 font-medium transition-all"
               style={{
-                backgroundColor:
-                  canGoForward
-                    ? resolvedTheme === 'dark'
-                      ? '#1e40af'
-                      : '#dbeafe'
-                    : resolvedTheme === 'dark'
-                      ? '#4b5563'
-                      : '#e5e7eb',
-                color:
-                  canGoForward
-                    ? resolvedTheme === 'dark'
-                      ? '#93c5fd'
-                      : '#1e40af'
-                    : resolvedTheme === 'dark'
-                      ? '#9ca3af'
-                      : '#9ca3af',
-                cursor: canGoForward ? 'pointer' : 'not-allowed',
+                backgroundColor: canGoForward
+                  ? resolvedTheme === "dark"
+                    ? "#1e40af"
+                    : "#dbeafe"
+                  : resolvedTheme === "dark"
+                    ? "#4b5563"
+                    : "#e5e7eb",
+                color: canGoForward
+                  ? resolvedTheme === "dark"
+                    ? "#93c5fd"
+                    : "#1e40af"
+                  : resolvedTheme === "dark"
+                    ? "#9ca3af"
+                    : "#9ca3af",
+                cursor: canGoForward ? "pointer" : "not-allowed",
                 opacity: canGoForward ? 1 : 0.6,
               }}
             >
