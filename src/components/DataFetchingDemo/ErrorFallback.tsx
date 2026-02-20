@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import styles from './ErrorFallback.module.css';
+import styles from "./ErrorFallback.module.css";
 
 /**
  * ErrorFallback component
@@ -75,12 +75,16 @@ interface ErrorFallbackProps {
  */
 function getErrorSeverity(
   error?: Error | string,
-  errorCode?: string | number
-): 'error' | 'warning' | 'info' {
-  const code = String(errorCode || '');
-  if (code.startsWith('4')) return 'warning'; // 4xx errors
-  if (code === '503') return 'warning'; // Service unavailable
-  return 'error'; // 5xx or unknown
+  errorCode?: string | number,
+): "error" | "warning" | "info" {
+  const code = String(errorCode || "");
+  if (code.startsWith("4")) {
+    return "warning"; // 4xx errors
+  }
+  if (code === "503") {
+    return "warning"; // Service unavailable
+  }
+  return "error"; // 5xx or unknown
 }
 
 /**
@@ -91,29 +95,28 @@ function getErrorSeverity(
 export default function ErrorFallback({
   error,
   onReset,
-  title = 'Something went wrong',
+  title = "Something went wrong",
   message,
   suggestions,
   errorCode,
-  showStack = process.env.NODE_ENV === 'development',
-  className = '',
+  showStack = process.env.NODE_ENV === "development",
+  className = "",
   testId,
 }: ErrorFallbackProps) {
   const errorMessage =
-    message ||
-    (error instanceof Error ? error.message : String(error || 'Unknown error'));
+    message || (error instanceof Error ? error.message : String(error || "Unknown error"));
   const severity = getErrorSeverity(error, errorCode);
 
   const severityClass = {
-    error: styles['container--error'],
-    warning: styles['container--warning'],
-    info: styles['container--info'],
+    error: styles["container--error"],
+    warning: styles["container--warning"],
+    info: styles["container--info"],
   };
 
   const severityIconMap = {
-    error: '⚠️',
-    warning: '⚠️',
-    info: 'ℹ️',
+    error: "⚠️",
+    warning: "⚠️",
+    info: "ℹ️",
   };
 
   return (
@@ -125,9 +128,7 @@ export default function ErrorFallback({
       <div className={styles.header}>
         <span className={styles.icon}>{severityIconMap[severity]}</span>
         <div className={styles.headerContent}>
-          <h2 className={styles.title}>
-            {title}
-          </h2>
+          <h2 className={styles.title}>{title}</h2>
           {errorCode && (
             <p className={styles.errorCode}>
               Error Code: <code className={styles.errorCodeValue}>{errorCode}</code>
@@ -138,48 +139,34 @@ export default function ErrorFallback({
 
       {/* Error Message */}
       <div className={styles.messageBox}>
-        <p className={styles.message}>
-          {errorMessage}
-        </p>
+        <p className={styles.message}>{errorMessage}</p>
       </div>
 
       {/* Stack Trace (Development only) */}
       {showStack && error instanceof Error && error.stack && (
         <details className={styles.stackTraceDetails}>
-          <summary className={styles.stackTraceSummary}>
-            Stack Trace (Development)
-          </summary>
-          <pre className={styles.stackTraceContent}>
-            {error.stack}
-          </pre>
+          <summary className={styles.stackTraceSummary}>Stack Trace (Development)</summary>
+          <pre className={styles.stackTraceContent}>{error.stack}</pre>
         </details>
       )}
 
       {/* Suggestions */}
       {suggestions && suggestions.length > 0 && (
         <div className={styles.suggestionsContainer}>
-          <p className={styles.suggestionsTitle}>
-            💡 Suggestions:
-          </p>
+          <p className={styles.suggestionsTitle}>💡 Suggestions:</p>
           <ul className={styles.suggestionsList}>
             {suggestions.map((suggestion, index) => {
-              const key = `suggestion-${index}-${typeof suggestion === 'string' ? suggestion.substring(0, 10) : suggestion.label}`;
-              if (typeof suggestion === 'string') {
+              const key = `suggestion-${index}-${typeof suggestion === "string" ? suggestion.substring(0, 10) : suggestion.label}`;
+              if (typeof suggestion === "string") {
                 return (
-                  <li
-                    key={key}
-                    className={styles.suggestionItem}
-                  >
+                  <li key={key} className={styles.suggestionItem}>
                     <span className={styles.suggestionBullet}>•</span>
                     {suggestion}
                   </li>
                 );
               }
               return (
-                <li
-                  key={key}
-                  className={styles.suggestionItem}
-                >
+                <li key={key} className={styles.suggestionItem}>
                   <span className={styles.suggestionBullet}>•</span>
                   <a
                     href={suggestion.href}
@@ -213,22 +200,14 @@ export default function ErrorFallback({
       {/* Action Buttons */}
       <div className={styles.actions}>
         {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className={styles.resetButton}
-          >
+          <button type="button" onClick={onReset} className={styles.resetButton}>
             🔄 Try Again
           </button>
         )}
-        <a
-          href="/"
-          className={styles.backLink}
-        >
+        <a href="/" className={styles.backLink}>
           ← Back Home
         </a>
       </div>
     </div>
   );
 }
-

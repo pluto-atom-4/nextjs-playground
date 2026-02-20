@@ -1,36 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { QuizCard } from '@/components/QuizCard';
-import { QuizSummary } from '@/components/QuizSummary';
-import { ProgressBar } from '@/components/ProgressBar';
-import type { ParsedQuestion } from '@/lib/quiz-parser';
+import { ProgressBar } from "@/components/ProgressBar";
+import { QuizCard } from "@/components/QuizCard";
+import { QuizSummary } from "@/components/QuizSummary";
 import completeQuizSession, {
   initializeQuizSession,
   getQuizQuestions,
   saveAnswer,
   toggleFlag,
   getQuizSession,
-
-} from '@/lib/quiz-actions';
+} from "@/lib/quiz-actions";
+import type { ParsedQuestion } from "@/lib/quiz-parser";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 export default function QuizPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<ParsedQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sessionId, setSessionId] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isQuizComplete, setIsQuizComplete] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [flagged, setFlagged] = useState<Set<number>>(new Set());
   const [answered, setAnswered] = useState<Set<number>>(new Set());
-  const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(
-    null
-  );
+  const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(null);
   const [userAnswers, setUserAnswers] = useState<Map<number, string>>(new Map());
 
-  const quizName = 'quiz1_algorithms_multiple_choice.csv';
+  const quizName = "quiz1_algorithms_multiple_choice.csv";
 
   // Initialize quiz session
   useEffect(() => {
@@ -44,14 +41,14 @@ export default function QuizPage() {
 
         setLoading(false);
       } catch (error) {
-        console.error('Failed to initialize quiz:', error);
+        console.error("Failed to initialize quiz:", error);
         // Try to load questions anyway
         try {
           const qs = await getQuizQuestions(quizName);
           setQuestions(qs);
           setSessionId(`quiz-${Date.now()}`);
         } catch {
-          console.error('Failed to load questions');
+          console.error("Failed to load questions");
         }
         setLoading(false);
       }
@@ -62,7 +59,9 @@ export default function QuizPage() {
 
   // Load existing session data
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      return;
+    }
 
     const loadSession = async () => {
       try {
@@ -71,17 +70,13 @@ export default function QuizPage() {
           setCurrentIndex(session.currentIndex);
           setFlagged(
             new Set(
-              session.flaggedItems
-                .filter((f: any) => f.isFlagged)
-                .map((f: any) => f.questionIndex)
-            )
+              session.flaggedItems.filter((f: any) => f.isFlagged).map((f: any) => f.questionIndex),
+            ),
           );
-          setAnswered(
-            new Set(session.userAnswers.map((a: any) => a.questionIndex))
-          );
+          setAnswered(new Set(session.userAnswers.map((a: any) => a.questionIndex)));
         }
       } catch (error) {
-        console.error('Failed to load session:', error);
+        console.error("Failed to load session:", error);
         // Continue anyway - session tracking is optional
       }
     };
@@ -91,12 +86,14 @@ export default function QuizPage() {
 
   const handleAnswer = useCallback(
     async (selectedOption: string, isCorrect: boolean) => {
-      if (!sessionId) return;
+      if (!sessionId) {
+        return;
+      }
 
       try {
         await saveAnswer(sessionId, currentIndex, selectedOption, isCorrect);
       } catch (error) {
-        console.error('Failed to save answer (continuing offline):', error);
+        console.error("Failed to save answer (continuing offline):", error);
       }
 
       setAnswered((prev) => new Set(prev).add(currentIndex));
@@ -113,17 +110,19 @@ export default function QuizPage() {
 
       setAutoAdvanceTimer(timer);
     },
-    [sessionId, currentIndex, questions.length]
+    [sessionId, currentIndex, questions.length],
   );
 
   const handleFlag = useCallback(
     async (isFlagged: boolean) => {
-      if (!sessionId) return;
+      if (!sessionId) {
+        return;
+      }
 
       try {
         await toggleFlag(sessionId, currentIndex, isFlagged);
       } catch (error) {
-        console.error('Failed to toggle flag (continuing offline):', error);
+        console.error("Failed to toggle flag (continuing offline):", error);
       }
 
       if (isFlagged) {
@@ -134,14 +133,14 @@ export default function QuizPage() {
         setFlagged(newFlagged);
       }
     },
-    [sessionId, currentIndex, flagged]
+    [sessionId, currentIndex, flagged],
   );
 
   const handleQuizComplete = useCallback(async () => {
     if (!sessionId) {
       // Fallback summary without session
       setSummary({
-        sessionId: 'offline',
+        sessionId: "offline",
         totalQuestions: questions.length,
         correctCount: answered.size,
         accuracy: 0,
@@ -157,10 +156,10 @@ export default function QuizPage() {
       setSummary(completionData);
       setIsQuizComplete(true);
     } catch (error) {
-      console.error('Failed to complete quiz:', error);
+      console.error("Failed to complete quiz:", error);
       // Fallback summary
       setSummary({
-        sessionId: 'offline',
+        sessionId: "offline",
         totalQuestions: questions.length,
         correctCount: answered.size,
         accuracy: 0,
@@ -191,14 +190,14 @@ export default function QuizPage() {
 
       setLoading(false);
     } catch (error) {
-      console.error('Failed to reinitialize quiz:', error);
+      console.error("Failed to reinitialize quiz:", error);
       // Try to load questions anyway
       try {
         const qs = await getQuizQuestions(quizName);
         setQuestions(qs);
         setSessionId(`quiz-${Date.now()}`);
       } catch {
-        console.error('Failed to load questions');
+        console.error("Failed to load questions");
       }
       setLoading(false);
     }
@@ -244,12 +243,10 @@ export default function QuizPage() {
   if (!questions.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-red-600 dark:text-red-400">
-          Failed to load quiz questions
-        </p>
+        <p className="text-red-600 dark:text-red-400">Failed to load quiz questions</p>
         <button
           type="button"
-          onClick={() => router.push('/')}
+          onClick={() => router.push("/")}
           className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Back Home
@@ -261,8 +258,8 @@ export default function QuizPage() {
   if (isQuizComplete && summary) {
     const quizAnswers = (summary.answers || []).map((answer: any) => ({
       questionIndex: answer.questionIndex,
-      term: questions[answer.questionIndex]?.term || '',
-      question: questions[answer.questionIndex]?.question || '',
+      term: questions[answer.questionIndex]?.term || "",
+      question: questions[answer.questionIndex]?.question || "",
       userAnswer: answer.userAnswer,
       correctAnswer: answer.correctAnswer,
       isCorrect: answer.isCorrect,
