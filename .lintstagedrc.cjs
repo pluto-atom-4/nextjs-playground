@@ -1,4 +1,4 @@
 module.exports = {
-  // Lint TypeScript and TSX files only (not building)
-  'src/**/*.{ts,tsx}': ['biome lint --write'],
+  // Run biome check (lint + format) on TypeScript and TSX files
+  'src/**/*.{ts,tsx}': ['biome check --write'],
 };
