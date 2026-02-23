@@ -1,7 +1,7 @@
 "use client";
 
 import { formatClientError } from "@/lib/error-handler";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import styles from "./blobs.module.css";
 
 interface FileRecord {
@@ -68,6 +68,110 @@ export default function BlobList({ initialRecords }: BlobListProps) {
       }
     }
     return text;
+  };
+
+  const renderContent = (text: string, contentType: string | null) => {
+    if (contentType === "text/markdown" || contentType === "text/x-markdown") {
+      return <div className={styles.markdownContent}>{renderMarkdown(text)}</div>;
+    }
+    if (contentType === "application/json") {
+      return (
+        <div className={styles.jsonContent}>
+          <pre>{formatContent(text, contentType)}</pre>
+        </div>
+      );
+    }
+    return <pre className={styles.preContent}>{text}</pre>;
+  };
+
+  const renderMarkdown = (markdown: string) => {
+    const elements: ReactElement[] = [];
+    const lines = markdown.split("\n");
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      if (!line.trim()) {
+        i++;
+        continue;
+      }
+
+      if (line.startsWith("# ")) {
+        elements.push(<h1 key={elements.length}>{line.slice(2).trim()}</h1>);
+      } else if (line.startsWith("## ")) {
+        elements.push(<h2 key={elements.length}>{line.slice(3).trim()}</h2>);
+      } else if (line.startsWith("### ")) {
+        elements.push(<h3 key={elements.length}>{line.slice(4).trim()}</h3>);
+      } else if (line.startsWith("#### ")) {
+        elements.push(<h4 key={elements.length}>{line.slice(5).trim()}</h4>);
+      } else if (line.startsWith("##### ")) {
+        elements.push(<h5 key={elements.length}>{line.slice(6).trim()}</h5>);
+      } else if (line.startsWith("###### ")) {
+        elements.push(<h6 key={elements.length}>{line.slice(7).trim()}</h6>);
+      } else if (line.startsWith("- ")) {
+        const listItems = [];
+        while (i < lines.length && lines[i].startsWith("- ")) {
+          listItems.push(<li key={i}>{lines[i].slice(2).trim()}</li>);
+          i++;
+        }
+        elements.push(<ul key={elements.length}>{listItems}</ul>);
+        continue;
+      } else {
+        elements.push(<p key={elements.length}>{renderInlineMarkdown(line)}</p>);
+      }
+
+      i++;
+    }
+
+    return elements;
+  };
+
+  const renderInlineMarkdown = (text: string): ReactElement | string => {
+    const parts: (ReactElement | string)[] = [];
+    let lastIndex = 0;
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    const italicRegex = /\*(.*?)\*/g;
+    const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+
+    const boldMatches = Array.from(text.matchAll(boldRegex));
+    const italicMatches = Array.from(text.matchAll(italicRegex)).filter(
+      (m) => !boldMatches.some((b) => b.index === m.index),
+    );
+    const linkMatches = Array.from(text.matchAll(linkRegex));
+
+    const allMatches = [...boldMatches, ...italicMatches, ...linkMatches].sort(
+      (a, b) => (a.index ?? 0) - (b.index ?? 0),
+    );
+
+    for (const match of allMatches) {
+      if (!match.index) {
+        continue;
+      }
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+
+      if (match[0].startsWith("**")) {
+        parts.push(<strong key={parts.length}>{match[1]}</strong>);
+      } else if (match[0].startsWith("[")) {
+        parts.push(
+          <a key={parts.length} href={match[2]} target="_blank" rel="noopener noreferrer">
+            {match[1]}
+          </a>,
+        );
+      } else {
+        parts.push(<em key={parts.length}>{match[1]}</em>);
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length === 1 && typeof parts[0] === "string" ? parts[0] : <>{parts}</>;
   };
 
   if (fileRecords.length === 0) {
@@ -137,11 +241,7 @@ export default function BlobList({ initialRecords }: BlobListProps) {
             </button>
             <h2>{selectedFile.fileName}</h2>
             {loading && <p>Loading...</p>}
-            {!loading && (
-              <pre className={styles.preContent}>
-                {formatContent(content, selectedFile.contentType)}
-              </pre>
-            )}
+            {!loading && renderContent(content, selectedFile.contentType)}
           </dialog>
         </div>
       )}
