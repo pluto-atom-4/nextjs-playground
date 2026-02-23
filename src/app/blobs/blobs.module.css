@@ -209,3 +209,46 @@
 .markdownContent em {
   font-style: italic;
 }
+
+.uploadSection {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--muted-background);
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+}
+
+.uploadLabel {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  padding: 0.5rem 1rem;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  transition: opacity 0.2s;
+}
+
+.uploadLabel:has(input:disabled) .uploadButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uploadLabel:hover:not(:has(input:disabled)) .uploadButton {
+  opacity: 0.8;
+}
+
+.error {
+  color: #ef4444;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
