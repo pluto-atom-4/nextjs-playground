@@ -1,7 +1,7 @@
 "use client";
 
 import { formatClientError } from "@/lib/error-handler";
-import { type ReactElement, useState } from "react";
+import { type ReactElement, useCallback, useState } from "react";
 import styles from "./blobs.module.css";
 
 interface FileRecord {
@@ -25,10 +25,12 @@ const VIEWABLE = new Set([
 ]);
 
 export default function BlobList({ initialRecords }: BlobListProps) {
-  const [fileRecords] = useState<FileRecord[]>(initialRecords);
+  const [fileRecords, setFileRecords] = useState<FileRecord[]>(initialRecords);
   const [selectedFile, setSelectedFile] = useState<FileRecord | null>(null);
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string>("");
 
   const handleView = async (record: FileRecord) => {
     setSelectedFile(record);
@@ -54,6 +56,42 @@ export default function BlobList({ initialRecords }: BlobListProps) {
       setLoading(false);
     }
   };
+
+  const handleUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.currentTarget.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", files[0]);
+
+      const response = await fetch("/api/blobs/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      setFileRecords(data.fileRecords);
+      setUploadError("");
+    } catch (error) {
+      const errorMessage = formatClientError(error, "Failed to upload file");
+      setUploadError(errorMessage);
+    } finally {
+      setUploading(false);
+      // Reset the file input
+      event.currentTarget.value = "";
+    }
+  }, []);
 
   const isViewable = (contentType: string | null) => {
     return contentType && VIEWABLE.has(contentType);
@@ -175,11 +213,45 @@ export default function BlobList({ initialRecords }: BlobListProps) {
   };
 
   if (fileRecords.length === 0) {
-    return <p>No file records found.</p>;
+    return (
+      <div>
+        <div className={styles.uploadSection}>
+          <label htmlFor="file-input" className={styles.uploadLabel}>
+            <input
+              id="file-input"
+              type="file"
+              onChange={handleUpload}
+              disabled={uploading}
+              className={styles.fileInput}
+              aria-label="Upload file"
+            />
+            <span className={styles.uploadButton}>
+              {uploading ? "Uploading..." : "Upload File"}
+            </span>
+          </label>
+          {uploadError && <p className={styles.error}>{uploadError}</p>}
+        </div>
+        <p>No file records found.</p>
+      </div>
+    );
   }
 
   return (
     <>
+      <div className={styles.uploadSection}>
+        <label htmlFor="file-input" className={styles.uploadLabel}>
+          <input
+            id="file-input"
+            type="file"
+            onChange={handleUpload}
+            disabled={uploading}
+            className={styles.fileInput}
+            aria-label="Upload file"
+          />
+          <span className={styles.uploadButton}>{uploading ? "Uploading..." : "Upload File"}</span>
+        </label>
+        {uploadError && <p className={styles.error}>{uploadError}</p>}
+      </div>
       <table className={styles.table}>
         <thead className={styles.tableHeader}>
           <tr>
