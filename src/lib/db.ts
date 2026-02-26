@@ -1,11 +1,14 @@
 import "dotenv/config";
 import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaLibSql} from "@prisma/adapter-libsql";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: ".env.local" });
 
 const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient | undefined;
-    prismaAdapter: PrismaLibSql | undefined;
-}
+  prisma: PrismaClient | undefined;
+  prismaAdapter: PrismaLibSql | undefined;
+};
 
 // Global type augmentation for Prisma
 declare global {
@@ -15,20 +18,18 @@ declare global {
 const prismaClientSingleton = () => {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL environment variable is not set.');
+    throw new Error("DATABASE_URL environment variable is not set.");
   }
 
   const adapter =
     globalForPrisma.prismaAdapter ??
     new PrismaLibSql({
-      url: databaseUrl
+      url: databaseUrl,
     });
 
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development'
-      ? ['query', 'error', 'warn']
-      : ['error'],
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 };
 
