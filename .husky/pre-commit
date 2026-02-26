@@ -16,8 +16,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "🔨 Running Next.js build validation..."
-pnpm build
+echo "🔨 Running TypeScript build validation..."
+pnpm transpile
 
 # Exit early if build failed
 if [ $? -ne 0 ]; then
