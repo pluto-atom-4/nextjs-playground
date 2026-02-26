@@ -1,8 +1,0 @@
-require('dotenv').config({ path: '.env.local' })
-module.exports = {
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-}
