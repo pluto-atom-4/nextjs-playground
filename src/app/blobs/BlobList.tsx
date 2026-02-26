@@ -147,6 +147,34 @@ export default function BlobList({ initialRecords }: BlobListProps) {
         elements.push(<h5 key={elements.length}>{line.slice(6).trim()}</h5>);
       } else if (line.startsWith("###### ")) {
         elements.push(<h6 key={elements.length}>{line.slice(7).trim()}</h6>);
+      } else if (line.includes("|")) {
+        // Check if this is a table row
+        const tableStart = i;
+        const tableLines = [line];
+        i++;
+
+        // Check if next line is separator
+        if (
+          i < lines.length &&
+          lines[i].includes("|") &&
+          /^\s*\|?\s*[-:\s|]+\|\s*[-:\s|]*\s*$/.test(lines[i])
+        ) {
+          tableLines.push(lines[i]);
+          i++;
+
+          // Collect table body rows
+          while (i < lines.length && lines[i].includes("|") && lines[i].trim()) {
+            tableLines.push(lines[i]);
+            i++;
+          }
+
+          elements.push(renderMarkdownTable(tableLines, elements.length));
+          continue;
+        }
+        // Not a table, treat as paragraph
+        i = tableStart + 1;
+        elements.push(<p key={elements.length}>{renderInlineMarkdown(line)}</p>);
+        continue;
       } else if (line.startsWith("- ")) {
         const listItems = [];
         while (i < lines.length && lines[i].startsWith("- ")) {
@@ -163,6 +191,47 @@ export default function BlobList({ initialRecords }: BlobListProps) {
     }
 
     return elements;
+  };
+
+  const renderMarkdownTable = (tableLines: string[], key: number) => {
+    const parseTableRow = (row: string) => {
+      return row
+        .split("|")
+        .map((cell) => cell.trim())
+        .filter((cell) => cell.length > 0);
+    };
+
+    if (tableLines.length < 2) {
+      return <p key={key}>Invalid table</p>;
+    }
+
+    const headerCells = parseTableRow(tableLines[0]);
+    const bodyRows = tableLines.slice(2).map((row) => parseTableRow(row));
+
+    return (
+      <table key={key} className={styles.markdownTable}>
+        <thead className={styles.markdownTableHeader}>
+          <tr>
+            {headerCells.map((cell) => (
+              <th key={`header-${cell}`} className={styles.markdownTableCell}>
+                {renderInlineMarkdown(cell)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {bodyRows.map((row) => (
+            <tr key={`row-${row.join("-")}`}>
+              {row.map((cell) => (
+                <td key={`cell-${row.join("-")}-${cell}`} className={styles.markdownTableCell}>
+                  {renderInlineMarkdown(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
   };
 
   const renderInlineMarkdown = (text: string): ReactElement | string => {

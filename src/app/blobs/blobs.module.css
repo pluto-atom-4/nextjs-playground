@@ -210,6 +210,36 @@
   font-style: italic;
 }
 
+.markdownTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+}
+
+.markdownTableHeader {
+  background-color: var(--muted-background);
+}
+
+.markdownTableCell {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.markdownTableHeader .markdownTableCell {
+  font-weight: 600;
+  background-color: var(--muted-background);
+}
+
+.markdownContent table tbody tr:nth-child(odd) {
+  background-color: transparent;
+}
+
+.markdownContent table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
 .uploadSection {
   margin-bottom: 1.5rem;
   padding: 1rem;
