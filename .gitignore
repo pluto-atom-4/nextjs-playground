@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# dotenvx encryption keys (NEVER commit these)
+.env.vault.keys
+.env.vault.local.keys
+
 # vercel
 .vercel
 
