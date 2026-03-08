@@ -15,7 +15,35 @@ This folder contains comprehensive documentation for implementing a Next.js data
 
 ## 📖 Core Documentation Files
 
-### 1. **Implementation Plan** (`implent-plan-fetching-data.md`)
+### 1. **dotenvx Setup Guide** (`dotenvx-setup-guide.md`)
+**Purpose:** Comprehensive guide for encrypted environment variable management  
+**Size:** 8,293 bytes | ~8.2 KB  
+**Key Sections:**
+- Overview and key benefits
+- Quick start for new developers
+- Vault access for team members
+- Common tasks (add vars, encrypt, decrypt)
+- Troubleshooting guide with 5+ common problems
+- Security best practices (DO's and DON'Ts)
+- Scripts reference
+- Resources and support links
+
+**Read this if:**
+- You're setting up the project for the first time
+- You need to understand encrypted environment variables
+- You're adding team members to the project
+- You want to add new secrets to the vault
+- You need troubleshooting help with environment setup
+
+**Key Stats:**
+- ✅ Quick start for new developers
+- ✅ Team key sharing procedures
+- ✅ 5+ troubleshooting scenarios covered
+- ✅ Security best practices included
+
+---
+
+### 2. **Implementation Plan** (`implent-plan-fetching-data.md`)
 **Purpose:** Complete implementation roadmap with 6 phases  
 **Size:** 1,027 lines | ~33 KB  
 **Key Sections:**
@@ -354,6 +382,7 @@ pnpm dev                     # Start dev server
 
 ## 📚 Related Documentation
 
+- `dotenvx-setup-guide.md` – Encrypted environment variable setup guide (8.2 KB)
 - `implent-plan-fetching-data.md` – Full implementation plan (1,027 lines)
 - `test-plan.md` – Comprehensive testing guide (1,410 lines)
 - `database-setup.md` – Step-by-step database setup (817 lines)

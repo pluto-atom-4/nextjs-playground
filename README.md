@@ -17,7 +17,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-**For detailed setup & team sharing instructions:** See [**DOTENVX_SETUP_GUIDE.md**](./generated/docs-copilot/DOTENVX_SETUP_GUIDE.md)
+**For detailed setup & team sharing instructions:** See [**DOTENVX_SETUP_GUIDE**](./docs/dotenvx-setup-guide.md)
 
 ---
 
@@ -56,7 +56,7 @@ Edit `.env.local` and add your credentials:
 - `CLERK_SECRET_KEY` - Get from https://dashboard.clerk.com  
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Get from Clerk dashboard
 
-**Note:** Environment variables are encrypted in `.env.vault` for production. See [DOTENVX_SETUP_GUIDE.md](./generated/docs-copilot/DOTENVX_SETUP_GUIDE.md) for team setup & encryption details.
+**Note:** Environment variables are encrypted in `.env.vault` for production. See [dotenvx-setup-guide.md](./docs/dotenvx-setup-guide.md) for team setup & encryption details.
 
 ### Initialize the Dev Database
 This project uses **Prisma 7** with **SQLite** for local development. Follow these steps to set up your database:
